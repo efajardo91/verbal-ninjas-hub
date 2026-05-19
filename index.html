@@ -1,0 +1,3049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Verbal Ninjas Toastmaster Session Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<!-- Firebase loaded directly — no dynamic loading, guaranteed available -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+  // Initialize Firebase immediately — before any other JS runs
+  (function() {
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp({
+          apiKey:      'AIzaSyBDjIpzIJ_z1Hk2GaMjdSdiZlTxvV0Gydg',
+          authDomain:  'toolbox-c06b9.firebaseapp.com',
+          databaseURL: 'https://toolbox-c06b9-default-rtdb.firebaseio.com',
+          projectId:   'toolbox-c06b9'
+        });
+      }
+      window.vnDb = firebase.database();
+      window.vnDbReady = true;
+      console.log('[VN] Firebase initialized ✓');
+    } catch(e) {
+      window.vnDbReady = false;
+      console.warn('[VN] Firebase init failed:', e.message);
+    }
+  })();
+</script>
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-dim: #8B6F32;
+    --bg: #0E0F14;
+    --surface: #16181F;
+    --surface2: #1E2029;
+    --surface3: #252836;
+    --border: rgba(201,168,76,0.18);
+    --border-soft: rgba(255,255,255,0.06);
+    --text: #F0EDE6;
+    --text-muted: #8C8A85;
+    --text-dim: #5A5855;
+    --green: #3EAD78;
+    --green-bg: rgba(62,173,120,0.12);
+    --yellow: #D4A017;
+    --yellow-bg: rgba(212,160,23,0.12);
+    --red: #C94040;
+    --red-bg: rgba(201,64,64,0.12);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 22px;
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+    --shadow: 0 4px 32px rgba(0,0,0,0.4);
+    --shadow-gold: 0 0 24px rgba(201,168,76,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,168,76,0.08) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 52px 20px 36px;
+    position: relative;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 0.5px solid var(--border);
+    padding: 5px 14px;
+    border-radius: 30px;
+    margin-bottom: 20px;
+    background: rgba(201,168,76,0.06);
+  }
+  .header-badge svg { width: 12px; height: 12px; fill: var(--gold); }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    color: var(--text);
+  }
+  h1 span { color: var(--gold); }
+  .header-sub {
+    margin-top: 12px;
+    font-size: 15px;
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0.01em;
+  }
+  .divider {
+    width: 48px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 20px auto 0;
+  }
+
+  /* NAV TABS */
+  .nav {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 5px;
+    margin: 0 0 28px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    flex: 1;
+    min-width: 100px;
+    padding: 9px 14px;
+    border-radius: calc(var(--radius-xl) - 4px);
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .nav-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .nav-btn:hover { color: var(--text); background: var(--surface2); }
+  .nav-btn.active {
+    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+    color: #0E0F14;
+    font-weight: 600;
+    box-shadow: 0 2px 12px rgba(201,168,76,0.3);
+  }
+  .nav-btn.active svg { stroke: #0E0F14; }
+
+  /* PANELS */
+  .panel { display: none; animation: fadeUp 0.3s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card-gold { border-color: var(--border); box-shadow: var(--shadow-gold); }
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .card-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+
+  /* TIMER */
+  .timer-presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .preset-btn {
+    padding: 7px 14px;
+    border-radius: 30px;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+  .preset-btn:hover, .preset-btn.selected { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.07); }
+
+  .timer-core {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: center;
+  }
+  .timer-face {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 32px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .timer-face::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .timer-speaker {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .timer-speaker input {
+    background: transparent;
+    border: none;
+    color: var(--gold);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    width: 200px;
+    outline: none;
+  }
+  .timer-speaker input::placeholder { color: var(--text-dim); }
+  .timer-digits {
+    font-family: var(--font-display);
+    font-size: 88px;
+    font-weight: 700;
+    letter-spacing: -3px;
+    line-height: 1;
+    color: var(--text);
+    transition: color 0.5s;
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-digits.state-green { color: var(--green); }
+  .timer-digits.state-yellow { color: var(--yellow); }
+  .timer-digits.state-red { color: var(--red); }
+
+  .timer-lights {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .light-dot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .light-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    transition: all 0.4s;
+    opacity: 0.2;
+  }
+  .light-circle.g { background: var(--green); }
+  .light-circle.y { background: var(--yellow); }
+  .light-circle.r { background: var(--red); }
+  .light-circle.on { opacity: 1; box-shadow: 0 0 14px currentColor; }
+  .light-circle.g.on { box-shadow: 0 0 14px var(--green); }
+  .light-circle.y.on { box-shadow: 0 0 14px var(--yellow); }
+  .light-circle.r.on { box-shadow: 0 0 14px var(--red); }
+  .light-label { font-size: 10px; color: var(--text-dim); letter-spacing: 0.08em; }
+
+  .timer-zone-labels {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .zone-chip {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .zone-chip.g { background: var(--green-bg); color: var(--green); }
+  .zone-chip.y { background: var(--yellow-bg); color: var(--yellow); }
+  .zone-chip.r { background: var(--red-bg); color: var(--red); }
+
+  .timer-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    min-width: 120px;
+  }
+  .ctrl-btn {
+    padding: 14px 20px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .ctrl-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .ctrl-btn:hover { border-color: var(--gold-dim); background: var(--surface3); }
+  .ctrl-btn.gold {
+    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+    border-color: var(--gold);
+    color: #0E0F14;
+    font-weight: 600;
+    box-shadow: 0 2px 16px rgba(201,168,76,0.25);
+  }
+  .ctrl-btn.gold:hover { box-shadow: 0 4px 24px rgba(201,168,76,0.4); }
+  .ctrl-btn.danger { border-color: rgba(201,64,64,0.4); color: var(--red); }
+  .ctrl-btn.danger:hover { background: var(--red-bg); }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } .timer-core { grid-template-columns: 1fr; } .timer-controls { flex-direction: row; min-width: auto; } }
+
+  /* AH COUNTER */
+  .speakers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .speaker-card {
+    background: var(--surface2);
+    border: 0.5px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .speaker-card:hover { border-color: var(--border); }
+  .speaker-name-input {
+    background: transparent;
+    border: none;
+    color: var(--gold);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    width: 100%;
+    outline: none;
+    margin-bottom: 10px;
+  }
+  .speaker-name-input::placeholder { color: var(--text-dim); }
+  .speaker-count { font-family: var(--font-display); font-size: 52px; font-weight: 700; color: var(--text); line-height: 1; }
+  .speaker-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; letter-spacing: 0.05em; }
+  .counter-btns { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
+  .count-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 0.5px solid var(--border-soft);
+    background: var(--surface3);
+    color: var(--text);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    font-weight: 300;
+    line-height: 1;
+  }
+  .count-btn:hover { background: var(--surface); border-color: var(--border); }
+  .count-btn.plus { background: var(--green-bg); border-color: rgba(62,173,120,0.3); color: var(--green); font-size: 22px; }
+  .count-btn.plus:hover { background: rgba(62,173,120,0.22); }
+  .count-btn.del { color: var(--text-dim); font-size: 14px; }
+  .count-btn.del:hover { color: var(--red); background: var(--red-bg); border-color: rgba(201,64,64,0.3); }
+
+  /* WORD OF THE DAY */
+  .wotd-display {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 28px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .wotd-display::before {
+    content: '"';
+    position: absolute;
+    top: -10px; left: 12px;
+    font-family: var(--font-display);
+    font-size: 100px;
+    color: rgba(201,168,76,0.07);
+    line-height: 1;
+    pointer-events: none;
+  }
+  .wotd-word { font-family: var(--font-display); font-size: 42px; font-weight: 700; color: var(--gold); letter-spacing: -0.5px; }
+  .wotd-pos { font-size: 12px; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin: 4px 0 10px; }
+  .wotd-def { font-size: 14px; color: var(--text-muted); line-height: 1.6; max-width: 480px; margin: 0 auto; }
+  .used-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .used-pill {
+    background: var(--green-bg);
+    border: 0.5px solid rgba(62,173,120,0.25);
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .used-pill:hover { background: rgba(62,173,120,0.22); }
+
+  /* INPUTS */
+  .field-group { display: flex; gap: 10px; margin-bottom: 12px; }
+  .field {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 0.5px solid var(--border-soft);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field:focus { border-color: var(--border); }
+  .field::placeholder { color: var(--text-dim); }
+  textarea.field { min-height: 80px; resize: vertical; line-height: 1.6; }
+
+  .add-btn {
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    background: rgba(201,168,76,0.09);
+    color: var(--gold);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .add-btn:hover { background: rgba(201,168,76,0.18); }
+
+  /* AGENDA */
+  .agenda-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-soft);
+    margin-bottom: 6px;
+    background: var(--surface2);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .agenda-item:hover { border-color: var(--border); }
+  .agenda-item.current { border-color: var(--gold-dim); background: rgba(201,168,76,0.05); }
+  .agenda-item.done { opacity: 0.45; }
+  .agenda-dot {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    transition: all 0.2s;
+  }
+  .agenda-item.current .agenda-dot { border-color: var(--gold); background: var(--gold); color: #0E0F14; }
+  .agenda-item.done .agenda-dot { border-color: var(--text-dim); background: var(--text-dim); color: var(--bg); }
+  .agenda-name { flex: 1; font-size: 14px; font-weight: 500; color: var(--text); }
+  .agenda-item.done .agenda-name { text-decoration: line-through; }
+  .agenda-dur { font-size: 12px; color: var(--text-dim); }
+  .agenda-del { font-size: 16px; color: var(--text-dim); cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: color 0.15s; }
+  .agenda-del:hover { color: var(--red); }
+
+  /* ROLES */
+  /* ROLES - live sign-up cards */
+  .roles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+  .role-card {
+    background: var(--surface2);
+    border: 0.5px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .role-card.filled {
+    border-color: rgba(62,173,120,0.35);
+    background: linear-gradient(135deg, var(--surface2), rgba(62,173,120,0.06));
+  }
+  .role-card.open {
+    border-color: var(--border);
+    cursor: pointer;
+  }
+  .role-card.open:hover {
+    border-color: var(--gold-dim);
+    background: rgba(201,168,76,0.04);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .role-card-icon {
+    font-size: 22px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .role-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 6px;
+  }
+  .role-assigned-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--green);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .role-assigned-name::before { content: '✓'; font-size: 12px; }
+  .role-open-label {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+  .role-claim-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    background: rgba(201,168,76,0.08);
+    color: var(--gold);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .role-claim-btn:hover { background: rgba(201,168,76,0.18); border-color: var(--gold-dim); }
+  .role-vacate-btn {
+    margin-top: 8px;
+    width: 100%;
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-soft);
+    background: transparent;
+    color: var(--text-dim);
+    font-family: var(--font-body);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .role-vacate-btn:hover { color: var(--red); border-color: rgba(201,64,64,0.3); background: var(--red-bg); }
+  .role-field { display: none; } /* hide old field style */
+
+  /* ROLE SIGN-UP MODAL */
+  .role-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.15s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .role-modal {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 28px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: var(--shadow);
+    animation: slideUp 0.2s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .role-modal-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .role-modal-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+  .role-modal-input {
+    width: 100%; padding: 12px 14px;
+    background: var(--surface2); border: 0.5px solid var(--border);
+    border-radius: var(--radius); color: var(--text);
+    font-family: var(--font-body); font-size: 15px; outline: none;
+    margin-bottom: 12px; transition: border-color 0.2s;
+  }
+  .role-modal-input:focus { border-color: var(--gold); }
+  .role-modal-input::placeholder { color: var(--text-dim); }
+  .role-modal-btns { display: flex; gap: 10px; }
+  .role-modal-confirm {
+    flex: 1; padding: 11px;
+    border-radius: var(--radius); border: none;
+    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+    color: #0E0F14; font-family: var(--font-body);
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: all 0.18s;
+  }
+  .role-modal-confirm:hover { box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
+  .role-modal-cancel {
+    padding: 11px 18px;
+    border-radius: var(--radius); border: 0.5px solid var(--border);
+    background: transparent; color: var(--text-muted);
+    font-family: var(--font-body); font-size: 14px; cursor: pointer;
+  }
+  .role-modal-cancel:hover { background: var(--surface2); }
+
+  /* NOTES */
+  .notes-area {
+    width: 100%;
+    min-height: 200px;
+    background: var(--surface2);
+    border: 0.5px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 18px;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s;
+    margin-bottom: 14px;
+  }
+  .notes-area:focus { border-color: var(--border); }
+  .notes-area::placeholder { color: var(--text-dim); }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 18px 0 10px;
+  }
+
+  /* ACTION ROW */
+  .action-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+  /* STATS ROW */
+  .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .stat-chip {
+    background: var(--surface2);
+    border: 0.5px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+  }
+  .stat-num { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--gold); }
+  .stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* GRAMMARIAN */
+  .grammar-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--border-soft);
+  }
+  .grammar-entry:last-child { border-bottom: none; }
+  .grammar-speaker { font-size: 13px; font-weight: 600; color: var(--gold-dim); min-width: 120px; }
+  .grammar-note { flex: 1; font-size: 13px; color: var(--text-muted); }
+  .grammar-type {
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .grammar-type.good { background: var(--green-bg); color: var(--green); }
+  .grammar-type.fix { background: var(--red-bg); color: var(--red); }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 24px 20px;
+    font-size: 12px;
+    color: var(--text-dim);
+    border-top: 0.5px solid var(--border-soft);
+    letter-spacing: 0.04em;
+  }
+  footer a { color: var(--gold-dim); text-decoration: none; }
+  footer a:hover { color: var(--gold); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 30px;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* PROGRESS BAR */
+  .progress-bar-wrap {
+    height: 3px;
+    background: var(--surface3);
+    border-radius: 3px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--green), var(--yellow), var(--red));
+    transition: width 0.5s linear;
+    width: 0%;
+  }
+
+  /* BELL ANIMATION */
+  @keyframes bellRing {
+    0%,100% { transform: rotate(0); }
+    15% { transform: rotate(18deg); }
+    30% { transform: rotate(-16deg); }
+    45% { transform: rotate(12deg); }
+    60% { transform: rotate(-8deg); }
+    75% { transform: rotate(4deg); }
+  }
+  .ringing { animation: bellRing 0.7s ease; }
+
+  /* ATTENDANCE */
+  .att-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-soft);
+    margin-bottom: 6px;
+    background: var(--surface2);
+    cursor: pointer;
+    transition: all 0.18s;
+    user-select: none;
+  }
+  .att-row:hover { border-color: var(--border); }
+  .att-row.present { border-color: rgba(62,173,120,0.3); background: var(--green-bg); }
+  .att-row.absent { opacity: 0.5; }
+  .att-check {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--text-dim);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    transition: all 0.18s;
+  }
+  .att-row.present .att-check { background: var(--green); border-color: var(--green); color: #0E0F14; font-weight: 700; }
+  .att-name { flex: 1; font-size: 14px; font-weight: 500; color: var(--text); }
+  .att-role-tag { font-size: 11px; color: var(--text-muted); padding: 2px 8px; border-radius: 12px; background: var(--surface3); }
+  .att-status { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; min-width: 52px; text-align: right; }
+  .att-row.present .att-status { color: var(--green); }
+  .att-row.absent .att-status { color: var(--text-dim); }
+  .att-del { font-size: 14px; color: var(--text-dim); padding: 2px 6px; border-radius: 4px; transition: color 0.15s; }
+  .att-del:hover { color: var(--red); }
+
+  /* ROLE SHEETS */
+  .rs-card {
+    background: var(--surface2);
+    border: 0.5px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .rs-card:hover { border-color: var(--border); }
+  .rs-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+  }
+  .rs-icon {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+  }
+  .rs-icon.officer { background: rgba(201,168,76,0.12); }
+  .rs-icon.functional { background: rgba(62,173,120,0.12); }
+  .rs-icon.evaluator { background: rgba(56,138,221,0.12); }
+  .rs-title-block { flex: 1; }
+  .rs-name { font-size: 15px; font-weight: 600; color: var(--text); }
+  .rs-cat-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-top: 3px;
+  }
+  .rs-cat-badge.officer { background: rgba(201,168,76,0.12); color: var(--gold); }
+  .rs-cat-badge.functional { background: var(--green-bg); color: var(--green); }
+  .rs-cat-badge.evaluator { background: rgba(56,138,221,0.12); color: #378ADD; }
+  .rs-chevron { color: var(--text-dim); font-size: 18px; transition: transform 0.2s; }
+  .rs-card.open .rs-chevron { transform: rotate(180deg); }
+  .rs-body {
+    display: none;
+    padding: 0 18px 18px;
+    border-top: 0.5px solid var(--border-soft);
+  }
+  .rs-card.open .rs-body { display: block; }
+  .rs-body p { font-size: 13px; color: var(--text-muted); line-height: 1.7; margin-top: 12px; }
+  .rs-body ul { margin: 10px 0 0 18px; }
+  .rs-body li { font-size: 13px; color: var(--text-muted); line-height: 1.8; }
+  .rs-del { font-size: 13px; color: var(--text-dim); cursor: pointer; padding: 2px 6px; transition: color 0.15s; }
+  .rs-del:hover { color: var(--red); }
+
+  /* PDF UPLOAD */
+  .pdf-upload-label {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 7px 14px; border-radius: 30px;
+    border: 0.5px dashed var(--border);
+    color: var(--text-muted); font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all 0.18s;
+  }
+  .pdf-upload-label:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.06); }
+  .pdf-download-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 7px 16px; border-radius: 30px;
+    border: 0.5px solid rgba(56,138,221,0.4);
+    background: rgba(56,138,221,0.08); color: #378ADD;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    text-decoration: none; transition: all 0.18s;
+  }
+  .pdf-download-btn:hover { background: rgba(56,138,221,0.18); border-color: #378ADD; }
+  .pdf-remove-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 10px; border-radius: 30px;
+    border: 0.5px solid var(--border-soft); background: transparent;
+    color: var(--text-dim); font-size: 11px; cursor: pointer; transition: all 0.15s;
+  }
+  .pdf-remove-btn:hover { color: var(--red); border-color: rgba(201,64,64,0.4); background: var(--red-bg); }
+  .pdf-row {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-top: 14px; padding-top: 14px; border-top: 0.5px solid var(--border-soft);
+  }
+  .pdf-filename { font-size: 12px; color: var(--text-muted); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* SESSIONS */
+  .session-row {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 13px 16px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-soft);
+    margin-bottom: 8px;
+    background: var(--surface2);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .session-row:hover { border-color: var(--border); background: var(--surface3); }
+  .session-row.active-sess { border-color: var(--gold-dim); background: rgba(201,168,76,0.05); box-shadow: 0 0 0 1px rgba(201,168,76,0.12); }
+  .session-row.completed { opacity: 0.55; }
+  .session-row.cancelled { opacity: 0.35; }
+  .session-row.next-up { border-color: rgba(62,173,120,0.4); background: var(--green-bg); }
+  .sess-date-block { text-align: center; }
+  .sess-day { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--text); line-height: 1; }
+  .sess-month { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+  .sess-year-lbl { font-size: 10px; color: var(--text-dim); }
+  .sess-info { min-width: 0; }
+  .sess-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .session-row.active-sess .sess-title { color: var(--gold); }
+  .sess-dow { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .sess-note-preview { font-size: 11px; color: var(--text-dim); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px; }
+  .sess-actions { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+  .sess-badge {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .sess-badge.upcoming { background: var(--surface3); color: var(--text-dim); }
+  .sess-badge.next { background: var(--green-bg); color: var(--green); }
+  .sess-badge.active { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .sess-badge.completed { background: var(--surface3); color: var(--text-dim); }
+  .sess-badge.cancelled { background: var(--red-bg); color: var(--red); }
+  .sess-mini-btns { display: flex; gap: 5px; }
+  .sess-mini-btn {
+    font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 12px;
+    border: 0.5px solid var(--border-soft); background: transparent;
+    color: var(--text-muted); cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .sess-mini-btn:hover { border-color: var(--border); color: var(--text); }
+  .sess-mini-btn.green:hover { background: var(--green-bg); color: var(--green); border-color: rgba(62,173,120,0.4); }
+  .sess-mini-btn.red:hover { background: var(--red-bg); color: var(--red); border-color: rgba(201,64,64,0.3); }
+  .sess-mini-btn.gold:hover { background: rgba(201,168,76,0.1); color: var(--gold); border-color: var(--gold-dim); }
+  .sess-expanded {
+    display: none;
+    padding: 10px 16px 14px;
+    border-top: 0.5px solid var(--border-soft);
+    margin-top: 6px;
+  }
+  .sess-expanded.open { display: block; }
+  .sess-note-input {
+    width: 100%; padding: 8px 12px;
+    background: var(--surface3); border: 0.5px solid var(--border-soft);
+    border-radius: var(--radius); color: var(--text); font-family: var(--font-body);
+    font-size: 13px; outline: none; transition: border-color 0.2s;
+    resize: none; min-height: 60px; line-height: 1.6;
+  }
+  .sess-note-input:focus { border-color: var(--border); }
+  .sess-note-input::placeholder { color: var(--text-dim); }
+  .sess-theme-input {
+    width: 100%; padding: 7px 12px; margin-bottom: 8px;
+    background: var(--surface3); border: 0.5px solid var(--border-soft);
+    border-radius: var(--radius); color: var(--text); font-family: var(--font-body);
+    font-size: 13px; outline: none; transition: border-color 0.2s;
+  }
+  .sess-theme-input:focus { border-color: var(--border); }
+  .sess-theme-input::placeholder { color: var(--text-dim); }
+  @media (max-width: 580px) {
+    .session-row { grid-template-columns: 48px 1fr; }
+    .sess-actions { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; margin-top: -6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="header-badge">
+      <svg viewBox="0 0 16 16"><path d="M8 1l1.88 4.26L14 6.27l-3 2.92.71 4.12L8 11.27l-3.71 1.94.71-4.12L2 6.27l4.12-.01z"/></svg>
+      Verbal Ninjas
+    </div>
+    <h1>Verbal Ninjas<br><span>Session Hub</span></h1>
+    <p class="header-sub">Sessions · Timer · Ah Counter · Word of the Day · Agenda · Roles · Grammarian · Attendance · Role Sheets</p>
+    <div class="divider"></div>
+  </header>
+
+  <nav class="nav" role="tablist">
+    <button class="nav-btn" onclick="showTab('sessions')" role="tab">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Sessions
+    </button>
+    <button class="nav-btn active" onclick="showTab('timer')" role="tab">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>Timer
+    </button>
+    <button class="nav-btn" onclick="showTab('counter')" role="tab">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Ah Counter
+    </button>
+    <button class="nav-btn" onclick="showTab('word')" role="tab">
+      <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>Word
+    </button>
+    <button class="nav-btn" onclick="showTab('agenda')" role="tab">
+      <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>Agenda
+    </button>
+    <button class="nav-btn" onclick="showTab('roles')" role="tab">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Roles
+    </button>
+    <button class="nav-btn" onclick="showTab('grammarian')" role="tab">
+      <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>Grammarian
+    </button>
+    <button class="nav-btn" onclick="showTab('notes')" role="tab">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Notes
+    </button>
+    <button class="nav-btn" onclick="showTab('attendance')" role="tab">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="23 11 17 17 14 14"/></svg>Attendance
+    </button>
+    <button class="nav-btn" onclick="showTab('rolesheets')" role="tab">
+      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>Role Sheets
+    </button>
+  </nav>
+
+  <!-- SESSIONS PANEL -->
+  <div id="panel-sessions" class="panel">
+    <div class="card card-gold">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Verbal Ninjas — Meeting Schedule
+      </div>
+      <p class="card-sub">Biweekly sessions starting May 26, 2026. Click a session to load it as the active meeting across all tabs.</p>
+
+      <div id="active-session-banner" style="display:none; background:rgba(201,168,76,0.08); border:0.5px solid var(--border); border-radius:var(--radius); padding:12px 16px; margin-bottom:16px; align-items:center; gap:12px;">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span style="font-size:13px;color:var(--text-muted);">Active session: <strong id="active-session-label" style="color:var(--gold);">None selected</strong></span>
+        <span id="active-session-num" style="font-size:11px;color:var(--text-dim);margin-left:auto;"></span>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-chip"><div class="stat-num" id="sess-total">0</div><div class="stat-lbl">Total sessions</div></div>
+        <div class="stat-chip"><div class="stat-num" id="sess-completed">0</div><div class="stat-lbl">Completed</div></div>
+        <div class="stat-chip"><div class="stat-num" id="sess-upcoming">0</div><div class="stat-lbl">Upcoming</div></div>
+        <div class="stat-chip"><div class="stat-num" id="sess-year">2026</div><div class="stat-lbl">Current year</div></div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="preset-btn selected" id="sf-all" onclick="filterSessions('all',this)">All</button>
+        <button class="preset-btn" id="sf-upcoming" onclick="filterSessions('upcoming',this)">Upcoming</button>
+        <button class="preset-btn" id="sf-past" onclick="filterSessions('past',this)">Past</button>
+        <button class="preset-btn" id="sf-2026" onclick="filterSessions('2026',this)">2026</button>
+        <button class="preset-btn" id="sf-2027" onclick="filterSessions('2027',this)">2027</button>
+      </div>
+
+      <div id="sessions-list"></div>
+    </div>
+
+    <div class="card" style="margin-top:0;">
+      <div class="card-title" style="font-size:15px;margin-bottom:12px;">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        How sessions work
+      </div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;">Click any upcoming session to <strong style="color:var(--text);">set it as active</strong> — the date will appear in the header and on attendance export sheets. Mark sessions as <strong style="color:var(--green);">Completed</strong> after each meeting, or <strong style="color:var(--red);">Cancelled</strong> if it doesn't run. Add notes to any session for future reference.</p>
+    </div>
+  </div>
+
+  <!-- TIMER PANEL -->
+  <div id="panel-timer" class="panel active">
+    <div class="card card-gold">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+        Speech Timer
+      </div>
+      <p class="card-sub">Select a preset or use custom zones. Lights activate at each boundary.</p>
+
+      <div class="timer-presets" id="presets-row">
+        <button class="preset-btn" onclick="setPreset(60,90,120,this)">Table Topics<br><span style="font-size:10px;opacity:.6">1–2 min</span></button>
+        <button class="preset-btn" onclick="setPreset(60,90,120,this)" style="display:none"></button>
+        <button class="preset-btn selected" onclick="setPreset(300,360,420,this)">Prepared Speech<br><span style="font-size:10px;opacity:.6">5–7 min</span></button>
+        <button class="preset-btn" onclick="setPreset(240,300,360,this)">Ice Breaker<br><span style="font-size:10px;opacity:.6">4–6 min</span></button>
+        <button class="preset-btn" onclick="setPreset(120,150,180,this)">Evaluation<br><span style="font-size:10px;opacity:.6">2–3 min</span></button>
+        <button class="preset-btn" onclick="setPreset(60,90,120,this)">Table Topics<br><span style="font-size:10px;opacity:.6">1–2 min</span></button>
+        <button class="preset-btn" onclick="openCustom()">Custom…</button>
+      </div>
+
+      <div id="custom-zone" style="display:none; margin-bottom:16px;">
+        <div class="field-group">
+          <input class="field" type="number" id="cz-green" placeholder="Green (sec)" min="1" />
+          <input class="field" type="number" id="cz-yellow" placeholder="Yellow (sec)" min="1" />
+          <input class="field" type="number" id="cz-red" placeholder="Red (sec)" min="1" />
+          <button class="add-btn" onclick="applyCustom()">Apply</button>
+        </div>
+      </div>
+
+      <div class="timer-core">
+        <div class="timer-face">
+          <div class="timer-speaker"><input id="speaker-input" placeholder="Speaker name" maxlength="30" /></div>
+          <div class="timer-digits" id="timer-digits">0:00</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill"></div></div>
+          <div class="timer-lights">
+            <div class="light-dot"><div class="light-circle g" id="lg"></div><div class="light-label">Green</div></div>
+            <div class="light-dot"><div class="light-circle y" id="ly"></div><div class="light-label">Yellow</div></div>
+            <div class="light-dot"><div class="light-circle r" id="lr"></div><div class="light-label">Red</div></div>
+          </div>
+          <div class="timer-zone-labels">
+            <span class="zone-chip g" id="zg">Green: 5:00</span>
+            <span class="zone-chip y" id="zy">Yellow: 6:00</span>
+            <span class="zone-chip r" id="zr">Red: 7:00</span>
+          </div>
+        </div>
+
+        <div class="timer-controls">
+          <button class="ctrl-btn gold" id="start-btn" onclick="toggleTimer()">
+            <svg id="play-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span id="start-label">Start</span>
+          </button>
+          <button class="ctrl-btn" onclick="resetTimer()">
+            <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+            Reset
+          </button>
+          <button class="ctrl-btn" id="bell-btn" onclick="ringBell()">
+            <svg id="bell-svg" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            Bell
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AH COUNTER PANEL -->
+  <div id="panel-counter" class="panel">
+    <div class="card card-gold">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Filler Word (Ah) Counter
+      </div>
+      <p class="card-sub">Track filler words per speaker. Tap <strong style="color:var(--green)">+</strong> each time one is used.</p>
+
+      <div class="stats-row" id="counter-stats">
+        <div class="stat-chip"><div class="stat-num" id="total-count">0</div><div class="stat-lbl">Total fillers</div></div>
+        <div class="stat-chip"><div class="stat-num" id="speaker-count-num">1</div><div class="stat-lbl">Speakers</div></div>
+        <div class="stat-chip"><div class="stat-num" id="worst-speaker">—</div><div class="stat-lbl">Most fillers</div></div>
+      </div>
+
+      <div class="speakers-grid" id="speakers-grid"></div>
+
+      <div class="action-row">
+        <button class="add-btn" onclick="addSpeaker()">+ Add speaker</button>
+        <button class="ctrl-btn danger" style="padding: 10px 16px; font-size:13px;" onclick="resetAllCounters()">Reset all</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORD OF THE DAY PANEL -->
+  <div id="panel-word" class="panel">
+    <div class="card card-gold">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+        Word of the Day
+        <span id="wotd-live-badge" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--surface3);color:var(--text-dim);margin-left:8px;letter-spacing:0.06em;">● LIVE</span>
+      </div>
+      <p class="card-sub">Grammarian sets the word — every visitor sees it instantly in real time.</p>
+
+      <!-- Live display -->
+      <div class="wotd-display" id="wotd-display">
+        <div class="wotd-word" id="wotd-word">—</div>
+        <div class="wotd-pos" id="wotd-pos"></div>
+        <div class="wotd-def" id="wotd-def">No word set yet. Grammarian — enter one below.</div>
+      </div>
+
+      <!-- Set word form -->
+      <div class="section-label">Set the word <span style="font-weight:400;font-size:11px;">(Grammarian only)</span></div>
+      <div class="field-group">
+        <input class="field" id="wotd-input" placeholder="Word" style="max-width:180px;" />
+        <input class="field" id="wotd-pos-input" placeholder="Part of speech (adj, noun…)" style="max-width:200px;" />
+      </div>
+      <div class="field-group">
+        <textarea class="field" id="wotd-def-input" placeholder="Definition and example sentence…" style="min-height:60px;"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="add-btn" onclick="setWord()">📡 Set Word (Live)</button>
+        <button class="ctrl-btn danger" style="font-size:13px;padding:9px 16px;" onclick="clearWord()">Clear word</button>
+      </div>
+
+      <!-- Members who used it -->
+      <div class="section-label" style="margin-top:18px;">Members who used it today <span style="font-weight:400;font-size:11px;">(click to remove)</span></div>
+      <div class="used-pills" id="used-pills"><span style="font-size:13px;color:var(--text-dim);">None recorded yet.</span></div>
+      <div class="field-group" style="margin-top:10px;">
+        <input class="field" id="used-input" placeholder="Member name" onkeydown="if(event.key==='Enter')addUsed()" />
+        <button class="add-btn" onclick="addUsed()">+ Mark used</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENDA PANEL -->
+  <div id="panel-agenda" class="panel">
+    <div class="card card-gold">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>
+        Meeting Agenda
+      </div>
+      <p class="card-sub">Click any item to cycle: pending → current → done. Reorder or add custom items.</p>
+      <div id="agenda-list"></div>
+      <div class="field-group" style="margin-top:14px;">
+        <input class="field" id="agenda-new-name" placeholder="Item name" />
+        <input class="field" id="agenda-new-dur" placeholder="Duration" style="max-width:110px;" />
+        <button class="add-btn" onclick="addAgendaItem()">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROLES PANEL -->
+  <div id="panel-roles" class="panel">
+    <div class="card card-gold">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Live Role Sign-Up
+        <span id="roles-live-badge" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--surface3);color:var(--text-dim);margin-left:8px;letter-spacing:0.06em;">● LIVE</span>
+      </div>
+      <p class="card-sub">Click any open role to sign up. Your name appears instantly for everyone visiting the site.</p>
+
+      <!-- Session banner -->
+      <div style="background:rgba(201,168,76,0.08);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:18px;font-size:13px;color:var(--gold);font-weight:500;display:flex;align-items:center;gap:8px;">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="roles-session-label">Loading next session…</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row" style="margin-bottom:18px;">
+        <div class="stat-chip"><div class="stat-num" id="roles-filled">0</div><div class="stat-lbl">Roles filled</div></div>
+        <div class="stat-chip"><div class="stat-num" id="roles-open">0</div><div class="stat-lbl">Still open</div></div>
+        <div class="stat-chip"><div class="stat-num" id="roles-total">0</div><div class="stat-lbl">Total roles</div></div>
+      </div>
+
+      <!-- Role cards grid -->
+      <div class="roles-grid" id="roles-grid"></div>
+
+      <!-- Admin clear button -->
+      <div style="border-top:0.5px solid var(--border-soft);margin-top:16px;padding-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <input class="field" type="password" id="roles-admin-pass" placeholder="Admin password to reset roles" style="max-width:240px;" onkeydown="if(event.key==='Enter')clearRoles()" />
+        <button class="ctrl-btn danger" style="font-size:13px;padding:9px 16px;" onclick="clearRoles()">🗑 Clear all roles</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRAMMARIAN PANEL -->
+  <div id="panel-grammarian" class="panel">
+    <div class="card card-gold">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        Grammarian Notes
+      </div>
+      <p class="card-sub">Log notable language moments — excellent usage, mispronunciations, grammar slips.</p>
+
+      <div class="field-group">
+        <input class="field" id="gram-speaker" placeholder="Speaker name" style="max-width:180px;" />
+        <input class="field" id="gram-note" placeholder="Observation or quote…" />
+        <select class="field" id="gram-type" style="max-width:100px;">
+          <option value="good">✦ Good</option>
+          <option value="fix">✗ Fix</option>
+        </select>
+        <button class="add-btn" onclick="addGrammarNote()">+ Log</button>
+      </div>
+
+      <div class="section-label">Log</div>
+      <div id="grammar-log"><p style="font-size:13px;color:var(--text-dim);">No entries yet.</p></div>
+
+      <div class="action-row" style="margin-top:14px;">
+        <button class="ctrl-btn" style="font-size:13px; padding:10px 16px;" onclick="clearGrammar()">Clear log</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES PANEL -->
+  <div id="panel-notes" class="panel">
+    <div class="card card-gold">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Meeting Notes
+      </div>
+      <p class="card-sub">General observations, award nominations, announcements, action items.</p>
+      <textarea class="notes-area" id="meeting-notes" placeholder="Start typing your notes here…&#10;&#10;Best Speaker: &#10;Best Evaluator: &#10;Best Table Topics: &#10;&#10;Announcements:&#10;&#10;Action Items:"></textarea>
+
+      <div class="section-label">Export / Copy</div>
+      <div class="action-row">
+        <button class="ctrl-btn" style="font-size:13px; padding:10px 16px;" onclick="copyNotes()">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy to clipboard
+        </button>
+        <button class="ctrl-btn" style="font-size:13px; padding:10px 16px;" onclick="printNotes()">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print / Save PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATTENDANCE PANEL -->
+  <div id="panel-attendance" class="panel">
+
+    <!-- STATUS BAR (shows connection state) -->
+    <div id="att-status-bar" style="display:none; align-items:center; gap:10px; padding:10px 16px; border-radius:var(--radius); border:0.5px solid var(--border-soft); background:var(--surface2); margin-bottom:14px; font-size:12px; color:var(--text-muted);">
+      <span id="att-status-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text-dim);flex-shrink:0;display:inline-block;"></span>
+      <span id="att-status-text">Connecting…</span>
+    </div>
+
+    <!-- MEMBER CHECK-IN CARD -->
+    <div class="card card-gold">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="23 11 17 17 14 14"/></svg>
+        Confirm Your Attendance
+      </div>
+      <p class="card-sub">Enter your name and click the button — you'll appear on the live board instantly.</p>
+
+      <div id="meeting-date-banner" style="background:rgba(201,168,76,0.08);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:18px;font-size:13px;color:var(--gold);font-weight:500;display:flex;align-items:center;gap:8px;">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="checkin-meeting-label">Meeting #1 — Monday, May 26, 2026</span>
+      </div>
+
+      <div class="field-group">
+        <input class="field" id="checkin-name" placeholder="Your full name" />
+        <input class="field" id="checkin-role" placeholder="Your role tonight (optional)" style="max-width:210px;" />
+        <button class="add-btn" id="checkin-btn" onclick="doCheckIn()" style="white-space:nowrap;">✓ I'm attending!</button>
+      </div>
+      <p id="checkin-msg" style="font-size:13px;margin-top:8px;min-height:20px;font-weight:500;"></p>
+    </div>
+
+    <!-- LIVE ATTENDANCE BOARD -->
+    <div class="card" id="att-board-card">
+      <div class="card-title" style="margin-bottom:6px;">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Live Attendance Board
+        <span id="live-badge" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--surface3);color:var(--text-dim);margin-left:8px;letter-spacing:0.06em;">● LIVE</span>
+      </div>
+      <p class="card-sub">Everyone who visits this page sees the same list in real time.</p>
+
+      <div class="stats-row">
+        <div class="stat-chip"><div class="stat-num" id="att-present">0</div><div class="stat-lbl">Confirmed</div></div>
+        <div class="stat-chip"><div class="stat-num" id="att-absent">0</div><div class="stat-lbl">Pending</div></div>
+        <div class="stat-chip"><div class="stat-num" id="att-total">0</div><div class="stat-lbl">Total roster</div></div>
+        <div class="stat-chip"><div class="stat-num" id="att-pct">—</div><div class="stat-lbl">Confirmed %</div></div>
+      </div>
+
+      <div class="section-label">✅ Confirmed attending</div>
+      <div id="att-confirmed-list" style="margin-bottom:16px;"><p style="font-size:13px;color:var(--text-dim);padding:6px 0;">No one confirmed yet — be the first! 🥷</p></div>
+
+      <div class="section-label">⏳ Not yet confirmed</div>
+      <div id="att-pending-list" style="margin-bottom:16px;"></div>
+
+      <!-- ADMIN PANEL (password-protected) -->
+      <div style="border-top:0.5px solid var(--border-soft);margin-top:12px;padding-top:12px;">
+        <div id="admin-lock" style="display:flex;align-items:center;gap:10px;">
+          <input class="field" type="password" id="admin-pass-input" placeholder="Admin password" style="max-width:200px;" />
+          <button class="ctrl-btn" style="font-size:13px;padding:9px 16px;" onclick="unlockAdmin()">🔐 Admin access</button>
+        </div>
+        <div id="admin-panel" style="display:none;margin-top:14px;">
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Add members to the roster, manage presence, or reset the session.</p>
+          <div class="field-group">
+            <input class="field" id="att-name-input" placeholder="Add member to roster" />
+            <input class="field" id="att-role-input" placeholder="Role (optional)" style="max-width:180px;" />
+            <button class="add-btn" onclick="addMember()">+ Add</button>
+          </div>
+          <div class="action-row" style="margin-top:10px;">
+            <button class="ctrl-btn" style="font-size:13px;padding:10px 16px;" onclick="markAllPresent()">✓ Mark all present</button>
+            <button class="ctrl-btn" style="font-size:13px;padding:10px 16px;" onclick="markAllAbsent()">✕ Mark all absent</button>
+            <button class="ctrl-btn" style="font-size:13px;padding:10px 16px;" onclick="exportAttendance()">⬇ Export register</button>
+            <button class="ctrl-btn danger" style="font-size:13px;padding:10px 16px;" onclick="clearAttendance()">🗑 Reset session</button>
+            <button class="ctrl-btn" style="font-size:13px;padding:10px 16px;" onclick="lockAdmin()">🔒 Lock</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Attendance script — uses Firebase initialized in <head> via window.vnDb -->
+  <script>
+  (function() {
+    var DB   = 'vn_attendance';
+    var LKEY = 'vn_att_v3';
+    var data = {};
+
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2,6); }
+    function saveLocal() { try { localStorage.setItem(LKEY, JSON.stringify(data)); } catch(e) {} }
+    function loadLocal()  { try { data = JSON.parse(localStorage.getItem(LKEY) || '{}'); } catch(e) {} }
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // ── Banner ─────────────────────────────────────────────────────
+    function updateBanner() {
+      var el = document.getElementById('checkin-meeting-label');
+      if (!el) return;
+      var D = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var start = new Date('2026-05-26T12:00:00');
+      var now = new Date(); now.setHours(0,0,0,0);
+      var two = 14*24*60*60*1000;
+      var meet = new Date(start); var num = 1;
+      while (meet < now) { meet = new Date(meet.getTime()+two); num++; }
+      el.textContent = 'Meeting #'+num+' — '+D[meet.getDay()]+', '+M[meet.getMonth()]+' '+meet.getDate()+', '+meet.getFullYear();
+    }
+
+    // ── Board renderer ─────────────────────────────────────────────
+    function draw() {
+      var list = Object.values(data);
+      var yes = list.filter(function(m){ return m.present; });
+      var no  = list.filter(function(m){ return !m.present; });
+      var tot = list.length;
+
+      function s(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+      s('att-present', yes.length);
+      s('att-absent',  no.length);
+      s('att-total',   tot);
+      s('att-pct', tot ? Math.round(yes.length/tot*100)+'%' : '—');
+
+      // Badge + status bar
+      var live = window.vnDbReady === true;
+      var badge = document.getElementById('live-badge');
+      var bar   = document.getElementById('att-status-bar');
+      var dot   = document.getElementById('att-status-dot');
+      var txt   = document.getElementById('att-status-text');
+      if (badge) {
+        badge.textContent = live ? '● LIVE' : '⚠ LOCAL ONLY';
+        badge.style.background = live ? 'var(--green-bg)' : 'var(--red-bg)';
+        badge.style.color = live ? 'var(--green)' : 'var(--red)';
+      }
+      if (bar) bar.style.display = 'flex';
+      if (dot) dot.style.background = live ? 'var(--green)' : 'var(--red)';
+      if (txt) txt.textContent = live
+        ? '● Live — all visitors see this board in real time'
+        : '⚠ Not connected to Firebase — data visible on this device only';
+
+      // Confirmed list
+      var cEl = document.getElementById('att-confirmed-list');
+      if (cEl) {
+        cEl.innerHTML = yes.length
+          ? yes.map(function(m) {
+              return '<div class="att-row present">'
+                +'<div class="att-check">✓</div>'
+                +'<div class="att-name">'+esc(m.name)+'</div>'
+                +(m.role?'<div class="att-role-tag">'+esc(m.role)+'</div>':'')
+                +'<div class="att-status" style="color:var(--green);">CONFIRMED</div>'
+                +'<div class="att-del" onclick="vnRemove(\''+m.id+'\')" title="Remove">✕</div>'
+                +'</div>';
+            }).join('')
+          : '<p style="font-size:13px;color:var(--text-dim);padding:6px 0;">No one confirmed yet — be the first! 🥷</p>';
+      }
+
+      // Pending list
+      var pEl = document.getElementById('att-pending-list');
+      if (pEl) {
+        pEl.innerHTML = no.length
+          ? no.map(function(m) {
+              return '<div class="att-row absent">'
+                +'<div class="att-check"></div>'
+                +'<div class="att-name">'+esc(m.name)+'</div>'
+                +(m.role?'<div class="att-role-tag">'+esc(m.role)+'</div>':'')
+                +'<div class="att-status">PENDING</div>'
+                +'<div class="att-del" onclick="vnRemove(\''+m.id+'\')" title="Remove">✕</div>'
+                +'</div>';
+            }).join('')
+          : (yes.length ? '<p style="font-size:13px;color:var(--text-dim);padding:6px 0;">Everyone confirmed — full house! 🎉</p>' : '');
+      }
+    }
+
+    // ── Firebase helpers ───────────────────────────────────────────
+    function fbSet(id, val) {
+      if (!window.vnDb) return false;
+      try {
+        if (val===null) window.vnDb.ref(DB+'/'+id).remove();
+        else window.vnDb.ref(DB+'/'+id).set(val);
+        return true;
+      } catch(e) { console.error('[VN] fbSet error:', e); return false; }
+    }
+
+    function startListener() {
+      if (!window.vnDb) {
+        console.warn('[VN] Firebase not available — local mode');
+        window.vnDbReady = false;
+        draw();
+        return;
+      }
+      console.log('[VN] Attaching Firebase listener on:', DB);
+      window.vnDb.ref(DB).on('value',
+        function(snap) {
+          data = snap.val() || {};
+          Object.keys(data).forEach(function(k){ if(!data[k].id) data[k].id=k; });
+          window.vnDbReady = true;
+          saveLocal();
+          draw();
+          console.log('[VN] Synced', Object.keys(data).length, 'records from Firebase');
+        },
+        function(err) {
+          console.error('[VN] Firebase listener error:', err.code, err.message);
+          window.vnDbReady = false;
+          draw();
+        }
+      );
+    }
+
+    // ── Public: Check-in ───────────────────────────────────────────
+    window.doCheckIn = function() {
+      var nameEl = document.getElementById('checkin-name');
+      var roleEl = document.getElementById('checkin-role');
+      var msgEl  = document.getElementById('checkin-msg');
+      var name   = nameEl ? nameEl.value.trim() : '';
+      var role   = roleEl ? roleEl.value.trim() : '';
+
+      if (!name) {
+        if (msgEl){ msgEl.textContent='⚠️ Please enter your name.'; msgEl.style.color='#C94040'; }
+        return;
+      }
+
+      var dup = null;
+      Object.values(data).forEach(function(m){
+        if (m.name.toLowerCase()===name.toLowerCase()) dup=m;
+      });
+      if (dup && dup.present) {
+        if (msgEl){ msgEl.textContent='✓ Already confirmed, '+name.split(' ')[0]+'! See you there 🥷'; msgEl.style.color='#3EAD78'; }
+        setTimeout(function(){ if(msgEl) msgEl.textContent=''; },5000);
+        return;
+      }
+
+      var id    = dup ? dup.id : uid();
+      var entry = { id:id, name:name, role:role, present:true, checkedAt:Date.now() };
+      data[id]  = entry;
+
+      // Firebase is source of truth — listener will call draw() after write
+      if (!fbSet(id, entry)) { saveLocal(); draw(); }
+
+      if (msgEl){ msgEl.textContent='✓ Confirmed! See you there, '+name.split(' ')[0]+' 🥷'; msgEl.style.color='#3EAD78'; }
+      if (nameEl) nameEl.value='';
+      if (roleEl) roleEl.value='';
+      setTimeout(function(){ if(msgEl) msgEl.textContent=''; },5000);
+    };
+
+    // ── Public: Admin actions ──────────────────────────────────────
+    window.vnRemove = function(id) {
+      delete data[id];
+      if (!fbSet(id,null)){ saveLocal(); draw(); }
+    };
+    window.clearAttendance = function() {
+      if (!confirm('Reset all attendance?')) return;
+      data = {};
+      if (window.vnDb){ try{ window.vnDb.ref(DB).remove(); }catch(e){} }
+      saveLocal(); draw();
+    };
+    window.markAllPresent = function() {
+      Object.values(data).forEach(function(m){ m.present=true; });
+      if(window.vnDb){ try{ var u={}; Object.values(data).forEach(function(m){ u[DB+'/'+m.id+'/present']=true; }); window.vnDb.ref().update(u); }catch(e){} }
+      else { saveLocal(); draw(); }
+      if(typeof showToast==='function') showToast('All marked present');
+    };
+    window.markAllAbsent = function() {
+      Object.values(data).forEach(function(m){ m.present=false; });
+      if(window.vnDb){ try{ var u={}; Object.values(data).forEach(function(m){ u[DB+'/'+m.id+'/present']=false; }); window.vnDb.ref().update(u); }catch(e){} }
+      else { saveLocal(); draw(); }
+      if(typeof showToast==='function') showToast('All marked absent');
+    };
+    window.addMember = function() {
+      var n=document.getElementById('att-name-input'), r=document.getElementById('att-role-input');
+      if(!n||!n.value.trim()){ if(typeof showToast==='function') showToast('Enter a name'); return; }
+      var id=uid(), entry={id:id,name:n.value.trim(),role:r?r.value.trim():'',present:false,checkedAt:Date.now()};
+      data[id]=entry;
+      if(!fbSet(id,entry)){ saveLocal(); draw(); }
+      n.value=''; if(r) r.value='';
+    };
+
+    // ── Boot ───────────────────────────────────────────────────────
+    loadLocal();
+    updateBanner();
+    draw();           // show local data immediately
+    startListener(); // attach Firebase — overwrites with live data
+
+  })();
+  </script>
+
+  <!-- ROLE SHEETS PANEL -->
+  <div id="panel-rolesheets" class="panel">
+    <div class="card card-gold">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        Role Sheet Repository
+      </div>
+      <p class="card-sub">Reference guides for every Toastmasters role. Expand any card to read the full brief.</p>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="preset-btn selected" onclick="filterSheets('all',this)">All roles</button>
+        <button class="preset-btn" onclick="filterSheets('officer',this)">Officers</button>
+        <button class="preset-btn" onclick="filterSheets('functional',this)">Functional</button>
+        <button class="preset-btn" onclick="filterSheets('evaluator',this)">Evaluators</button>
+      </div>
+
+      <div id="rolesheets-grid" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+      <div class="section-label" style="margin-top:24px;">Add a custom role sheet</div>
+      <div class="field-group">
+        <input class="field" id="rs-title" placeholder="Role title" style="max-width:220px;" />
+        <select class="field" id="rs-cat" style="max-width:140px;">
+          <option value="officer">Officer</option>
+          <option value="functional">Functional</option>
+          <option value="evaluator">Evaluator</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <textarea class="field" id="rs-body" placeholder="Role description, responsibilities, tips…" style="min-height:80px;"></textarea>
+      </div>
+      <div style="margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+        <label class="pdf-upload-label" for="rs-pdf-input">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
+          Attach PDF script (optional)
+        </label>
+        <input type="file" id="rs-pdf-input" accept="application/pdf" style="display:none;" onchange="previewNewPdf(this)" />
+        <span id="rs-pdf-name" style="font-size:12px;color:var(--gold);"></span>
+      </div>
+      <button class="add-btn" onclick="addRoleSheet()">+ Add role sheet</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>Verbal Ninjas Toastmaster Session Hub &mdash; Built for club excellence &mdash; <a href="https://www.toastmasters.org" target="_blank" rel="noopener">toastmasters.org</a></p>
+</footer>
+
+<script>
+// ─── TABS ────────────────────────────────────────────────────────────────────
+const TABS = ['sessions','timer','counter','word','agenda','roles','grammarian','notes','attendance','rolesheets'];
+function showTab(id) {
+  TABS.forEach(t => {
+    document.getElementById('panel-'+t).classList.toggle('active', t===id);
+  });
+  document.querySelectorAll('.nav-btn').forEach((btn,i) => {
+    btn.classList.toggle('active', TABS[i]===id);
+  });
+  // Re-render tab-specific content when switching tabs
+  if (id === 'roles')      { try { renderRoles(); } catch(e) {} }
+  if (id === 'word')       { try { if(window.vnDb) window.vnDb.ref('vn_wotd').once('value',function(s){wotdDraw(s.val());}); } catch(e) {} }
+  if (id === 'sessions')   { try { renderSessions(); } catch(e) {} }
+  if (id === 'attendance') { try { renderAttendance(); updateCheckinBanner(); } catch(e) {} }
+}
+
+// ─── SESSIONS ────────────────────────────────────────────────────────────────
+const MEETING_START = new Date('2026-05-26T00:00:00');
+const BIWEEKLY_MS   = 14 * 24 * 60 * 60 * 1000;
+const SESSION_COUNT = 30; // generate 30 sessions (~15 months)
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+let sessions = [];
+let activeSessionIdx = null;
+let sessFilter = 'all';
+let expandedSess = null;
+
+function buildSessions() {
+  // Load saved state from localStorage
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem('vn_sessions') || '{}'); } catch(e) {}
+
+  sessions = [];
+  for (let i = 0; i < SESSION_COUNT; i++) {
+    const d = new Date(MEETING_START.getTime() + i * BIWEEKLY_MS);
+    const key = d.toISOString().slice(0,10);
+    const s = saved[key] || {};
+    sessions.push({
+      date: d,
+      key,
+      num: i + 1,
+      status: s.status || 'upcoming',   // upcoming | completed | cancelled
+      theme: s.theme || '',
+      note: s.note || '',
+      isActive: s.isActive || false
+    });
+  }
+  // Restore active session
+  activeSessionIdx = sessions.findIndex(s => s.isActive);
+  if (activeSessionIdx === -1) activeSessionIdx = null;
+}
+
+function saveSessions() {
+  const obj = {};
+  sessions.forEach(s => {
+    obj[s.key] = { status: s.status, theme: s.theme, note: s.note, isActive: s.isActive };
+  });
+  try { localStorage.setItem('vn_sessions', JSON.stringify(obj)); } catch(e) {}
+}
+
+function filterSessions(f, btn) {
+  sessFilter = f;
+  document.querySelectorAll('#panel-sessions .preset-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  renderSessions();
+}
+
+function setActiveSession(i) {
+  sessions.forEach((s, idx) => { s.isActive = idx === i; });
+  activeSessionIdx = i;
+  saveSessions();
+  renderSessions();
+  updateActiveBanner();
+  showToast('Session ' + sessions[i].num + ' set as active');
+}
+
+function updateActiveBanner() {
+  const banner = document.getElementById('active-session-banner');
+  const lbl = document.getElementById('active-session-label');
+  const num = document.getElementById('active-session-num');
+  if (activeSessionIdx !== null && sessions[activeSessionIdx]) {
+    const s = sessions[activeSessionIdx];
+    const d = s.date;
+    const fmt = DAYS[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+    lbl.textContent = fmt + (s.theme ? ' — ' + s.theme : '');
+    num.textContent = 'Meeting #' + s.num;
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function cycleStatus(i, val) {
+  sessions[i].status = val;
+  saveSessions();
+  renderSessions();
+}
+
+function toggleExpand(i) {
+  expandedSess = expandedSess === i ? null : i;
+  renderSessions();
+}
+
+function saveSessionNote(i) {
+  const ta = document.getElementById('snote-' + i);
+  const th = document.getElementById('stheme-' + i);
+  if (ta) sessions[i].note = ta.value;
+  if (th) sessions[i].theme = th.value;
+  saveSessions();
+  showToast('Session notes saved');
+}
+
+function getSessionStats() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const total = sessions.length;
+  const completed = sessions.filter(s => s.status === 'completed').length;
+  const upcoming = sessions.filter(s => {
+    const d = new Date(s.date); d.setHours(0,0,0,0);
+    return d >= today && s.status === 'upcoming';
+  }).length;
+  return { total, completed, upcoming };
+}
+
+function getNextUpIdx() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  return sessions.findIndex(s => {
+    const d = new Date(s.date); d.setHours(0,0,0,0);
+    return d >= today && s.status === 'upcoming';
+  });
+}
+
+function renderSessions() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const nextUpIdx = getNextUpIdx();
+  const stats = getSessionStats();
+
+  document.getElementById('sess-total').textContent = stats.total;
+  document.getElementById('sess-completed').textContent = stats.completed;
+  document.getElementById('sess-upcoming').textContent = stats.upcoming;
+  document.getElementById('sess-year').textContent = new Date().getFullYear();
+
+  updateActiveBanner();
+
+  let filtered = sessions.filter((s, i) => {
+    const d = new Date(s.date); d.setHours(0,0,0,0);
+    const isPast = d < today || s.status === 'completed' || s.status === 'cancelled';
+    const isUpcoming = !isPast;
+    if (sessFilter === 'past') return isPast;
+    if (sessFilter === 'upcoming') return isUpcoming;
+    if (sessFilter === '2026') return s.date.getFullYear() === 2026;
+    if (sessFilter === '2027') return s.date.getFullYear() === 2027;
+    return true;
+  });
+
+  const list = document.getElementById('sessions-list');
+  if (!filtered.length) {
+    list.innerHTML = '<p style="font-size:13px;color:var(--text-dim);padding:10px 0;">No sessions in this view.</p>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(s => {
+    const i = sessions.indexOf(s);
+    const d = s.date;
+    const dDate = new Date(d); dDate.setHours(0,0,0,0);
+    const isPast = dDate < today;
+    const isNextUp = i === nextUpIdx;
+    const isActiveSess = activeSessionIdx === i;
+    const isExpanded = expandedSess === i;
+
+    let rowClass = 'session-row';
+    if (isActiveSess) rowClass += ' active-sess';
+    else if (s.status === 'completed') rowClass += ' completed';
+    else if (s.status === 'cancelled') rowClass += ' cancelled';
+    else if (isNextUp) rowClass += ' next-up';
+
+    let badge = '';
+    if (isActiveSess) badge = '<span class="sess-badge active">● Active</span>';
+    else if (s.status === 'completed') badge = '<span class="sess-badge completed">✓ Done</span>';
+    else if (s.status === 'cancelled') badge = '<span class="sess-badge cancelled">✕ Cancelled</span>';
+    else if (isNextUp) badge = '<span class="sess-badge next">▶ Next up</span>';
+    else badge = '<span class="sess-badge upcoming">Upcoming</span>';
+
+    const actionBtns = `
+      <div class="sess-mini-btns">
+        ${!isActiveSess ? `<button class="sess-mini-btn gold" onclick="event.stopPropagation();setActiveSession(${i})">Set active</button>` : ''}
+        ${s.status !== 'completed' ? `<button class="sess-mini-btn green" onclick="event.stopPropagation();cycleStatus(${i},'completed')">Done</button>` : `<button class="sess-mini-btn" onclick="event.stopPropagation();cycleStatus(${i},'upcoming')">Undo</button>`}
+        ${s.status !== 'cancelled' ? `<button class="sess-mini-btn red" onclick="event.stopPropagation();cycleStatus(${i},'cancelled')">Cancel</button>` : `<button class="sess-mini-btn" onclick="event.stopPropagation();cycleStatus(${i},'upcoming')">Restore</button>`}
+        <button class="sess-mini-btn" onclick="event.stopPropagation();toggleExpand(${i})">${isExpanded ? 'Close' : 'Notes'}</button>
+      </div>`;
+
+    const expanded = `
+      <div class="sess-expanded ${isExpanded ? 'open' : ''}" id="sexp-${i}">
+        <input class="sess-theme-input" id="stheme-${i}" placeholder="Session theme (optional)" value="${s.theme.replace(/"/g,'&quot;')}" />
+        <textarea class="sess-note-input" id="snote-${i}" placeholder="Notes for this session — speeches planned, special guests, announcements…">${s.note}</textarea>
+        <div style="margin-top:8px;display:flex;gap:8px;">
+          <button class="add-btn" onclick="saveSessionNote(${i})">Save notes</button>
+          <button class="sess-mini-btn gold" onclick="setActiveSession(${i})" style="padding:7px 14px;">Set as active session</button>
+        </div>
+      </div>`;
+
+    return `
+    <div class="${rowClass}" id="srow-${i}" onclick="toggleExpand(${i})">
+      <div class="sess-date-block">
+        <div class="sess-day">${d.getDate()}</div>
+        <div class="sess-month">${MONTHS[d.getMonth()]}</div>
+        <div class="sess-year-lbl">${d.getFullYear()}</div>
+      </div>
+      <div class="sess-info">
+        <div class="sess-title">Meeting #${s.num}${s.theme ? ' — ' + s.theme : ''}</div>
+        <div class="sess-dow">${DAYS[d.getDay()]}</div>
+        ${s.note ? `<div class="sess-note-preview">${s.note}</div>` : ''}
+        ${expanded}
+      </div>
+      <div class="sess-actions">
+        ${badge}
+        ${actionBtns}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Update attendance export to include active session date
+function exportAttendance() {
+  const sess = activeSessionIdx !== null ? sessions[activeSessionIdx] : null;
+  if (!members.length) { showToast('No members to export'); return; }
+  const d = sess ? sess.date : new Date();
+  const date = d.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const present = members.filter(m=>m.present);
+  const absent  = members.filter(m=>!m.present);
+  const lines = [
+    `VERBAL NINJAS TOASTMASTERS — ATTENDANCE REGISTER`,
+    sess ? `Meeting #${sess.num}${sess.theme ? ' — ' + sess.theme : ''}` : '',
+    `Date: ${date}`,
+    `Total: ${members.length} members | Present: ${present.length} | Absent: ${absent.length} | ${members.length ? Math.round(present.length/members.length*100) : 0}% attendance`,
+    ``,`PRESENT (${present.length}):`,
+    ...present.map(m=>`  ✓  ${m.name}${m.role?' — '+m.role:''}`),
+    ``,`ABSENT (${absent.length}):`,
+    ...absent.map(m=>`  ✗  ${m.name}${m.role?' — '+m.role:''}`)
+  ].filter(l => l !== undefined).join('\n');
+  const win = window.open('','_blank');
+  win.document.write(`<html><head><title>Attendance Register</title><style>
+    body{font-family:Georgia,serif;max-width:680px;margin:40px auto;line-height:1.8;color:#111;}
+    h1{font-size:20px;border-bottom:1px solid #ccc;padding-bottom:8px;}
+    pre{white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;}
+  </style></head><body><h1>Verbal Ninjas — Attendance Register</h1><pre>${lines}</pre></body></html>`);
+  win.document.close(); win.print();
+}
+
+buildSessions();
+renderSessions();
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── TIMER ───────────────────────────────────────────────────────────────────
+let timerSec = 0, running = false, interval = null;
+let greenAt = 300, yellowAt = 360, redAt = 420;
+
+function fmt(s) { return Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60); }
+
+function updateTimer() {
+  const el = document.getElementById('timer-digits');
+  el.textContent = fmt(timerSec);
+  el.className = 'timer-digits';
+  ['lg','ly','lr'].forEach(id => document.getElementById(id).classList.remove('on'));
+  const fill = document.getElementById('progress-fill');
+  const pct = Math.min(100, (timerSec / redAt) * 100);
+  fill.style.width = pct + '%';
+  if (timerSec >= redAt) { el.classList.add('state-red'); document.getElementById('lr').classList.add('on'); }
+  else if (timerSec >= yellowAt) { el.classList.add('state-yellow'); document.getElementById('ly').classList.add('on'); }
+  else if (timerSec >= greenAt) { el.classList.add('state-green'); document.getElementById('lg').classList.add('on'); }
+}
+
+function toggleTimer() {
+  if (running) {
+    clearInterval(interval); running = false;
+    document.getElementById('start-label').textContent = 'Resume';
+    document.getElementById('play-icon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+  } else {
+    running = true;
+    document.getElementById('start-label').textContent = 'Pause';
+    document.getElementById('play-icon').innerHTML = '<line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/>';
+    interval = setInterval(() => { timerSec++; updateTimer(); }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(interval); running = false; timerSec = 0;
+  document.getElementById('start-label').textContent = 'Start';
+  document.getElementById('play-icon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+  updateTimer();
+}
+
+function setPreset(g, y, r, btn) {
+  greenAt = g; yellowAt = y; redAt = r;
+  document.getElementById('zg').textContent = 'Green: ' + fmt(g);
+  document.getElementById('zy').textContent = 'Yellow: ' + fmt(y);
+  document.getElementById('zr').textContent = 'Red: ' + fmt(r);
+  resetTimer();
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('selected'));
+  if (btn) btn.classList.add('selected');
+  document.getElementById('custom-zone').style.display = 'none';
+}
+
+function openCustom() {
+  const cz = document.getElementById('custom-zone');
+  cz.style.display = cz.style.display === 'none' ? 'block' : 'none';
+}
+
+function applyCustom() {
+  const g = parseInt(document.getElementById('cz-green').value) || 300;
+  const y = parseInt(document.getElementById('cz-yellow').value) || 360;
+  const r = parseInt(document.getElementById('cz-red').value) || 420;
+  setPreset(g, y, r, null);
+  document.getElementById('custom-zone').style.display = 'none';
+  showToast('Custom zones applied');
+}
+
+function ringBell() {
+  const btn = document.getElementById('bell-btn');
+  const svg = document.getElementById('bell-svg');
+  svg.classList.add('ringing');
+  setTimeout(() => svg.classList.remove('ringing'), 750);
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [880, 1108, 1320].forEach((freq, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq; o.type = 'sine';
+      g.gain.setValueAtTime(0, ctx.currentTime + i * 0.08);
+      g.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i * 0.08 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 1.4);
+      o.start(ctx.currentTime + i * 0.08);
+      o.stop(ctx.currentTime + i * 0.08 + 1.4);
+    });
+  } catch(e) {}
+}
+
+// Initialize timer display
+setPreset(300, 360, 420, null);
+
+// ─── AH COUNTER ──────────────────────────────────────────────────────────────
+let speakers = [
+  { name: 'Speaker 1', count: 0 },
+  { name: 'Speaker 2', count: 0 }
+];
+
+function renderSpeakers() {
+  const grid = document.getElementById('speakers-grid');
+  grid.innerHTML = speakers.map((s, i) => `
+    <div class="speaker-card">
+      <input class="speaker-name-input" value="${s.name}" placeholder="Speaker name"
+        onchange="speakers[${i}].name=this.value; updateCounterStats();" />
+      <div class="speaker-count" id="sc-${i}">${s.count}</div>
+      <div class="speaker-label">filler words</div>
+      <div class="counter-btns">
+        <button class="count-btn" onclick="adjustCount(${i},-1)" aria-label="Decrease">−</button>
+        <button class="count-btn plus" onclick="adjustCount(${i},1)" aria-label="Increase">+</button>
+        <button class="count-btn del" onclick="removeSpeaker(${i})" aria-label="Remove speaker">✕</button>
+      </div>
+    </div>`).join('');
+  updateCounterStats();
+}
+
+function adjustCount(i, delta) {
+  speakers[i].count = Math.max(0, speakers[i].count + delta);
+  document.getElementById('sc-'+i).textContent = speakers[i].count;
+  updateCounterStats();
+}
+
+function updateCounterStats() {
+  const total = speakers.reduce((a, s) => a + s.count, 0);
+  document.getElementById('total-count').textContent = total;
+  document.getElementById('speaker-count-num').textContent = speakers.length;
+  const worst = speakers.reduce((a, s) => s.count > a.count ? s : a, {name:'—',count:-1});
+  document.getElementById('worst-speaker').textContent = worst.count > 0 ? worst.name.split(' ')[0] : '—';
+}
+
+function addSpeaker() {
+  speakers.push({ name: 'Speaker ' + (speakers.length + 1), count: 0 });
+  renderSpeakers();
+}
+
+function removeSpeaker(i) {
+  if (speakers.length <= 1) { showToast('Need at least one speaker'); return; }
+  speakers.splice(i, 1);
+  renderSpeakers();
+}
+
+function resetAllCounters() {
+  speakers.forEach(s => s.count = 0);
+  renderSpeakers();
+  showToast('All counts reset');
+}
+
+renderSpeakers();
+
+// ─── WORD OF THE DAY (Firebase live) ─────────────────────────────────────────
+const WOTD_PATH = 'vn_wotd';
+
+function wotdDraw(d) {
+  // d = { word, pos, def, usedBy: {id: name} } or null
+  const word = d && d.word ? d.word : '—';
+  const pos  = d && d.pos  ? d.pos  : '';
+  const def  = d && d.def  ? d.def  : 'No word set yet. Grammarian — enter one below.';
+  const used = d && d.usedBy ? Object.values(d.usedBy) : [];
+
+  document.getElementById('wotd-word').textContent = word;
+  document.getElementById('wotd-pos').textContent  = pos;
+  document.getElementById('wotd-def').textContent  = def;
+
+  // Pre-fill inputs for easy editing
+  const wi = document.getElementById('wotd-input');
+  const pi = document.getElementById('wotd-pos-input');
+  const di = document.getElementById('wotd-def-input');
+  if (wi && word !== '—') wi.value = word;
+  if (pi) pi.value = pos;
+  if (di) di.value = def === 'No word set yet. Grammarian — enter one below.' ? '' : def;
+
+  // Used pills
+  const el = document.getElementById('used-pills');
+  if (el) {
+    if (!used.length) {
+      el.innerHTML = '<span style="font-size:13px;color:var(--text-dim);">None recorded yet.</span>';
+    } else {
+      el.innerHTML = used.map(function(u) {
+        return '<span class="used-pill" onclick="removeUsed(\'' + u.id + '\')" title="Click to remove">'
+          + u.name + ' ✕</span>';
+      }).join('');
+    }
+  }
+
+  // Badge
+  const badge = document.getElementById('wotd-live-badge');
+  if (badge && window.vnDbReady) {
+    badge.textContent = '● LIVE';
+    badge.style.background = 'var(--green-bg)';
+    badge.style.color = 'var(--green)';
+  }
+}
+
+function setWord() {
+  const w   = document.getElementById('wotd-input').value.trim();
+  const pos = document.getElementById('wotd-pos-input').value.trim();
+  const def = document.getElementById('wotd-def-input').value.trim();
+  if (!w) { showToast('Enter a word first'); return; }
+
+  const entry = { word: w, pos: pos, def: def || '', setAt: Date.now(), usedBy: {} };
+
+  if (window.vnDb) {
+    // Preserve existing usedBy list when updating word details
+    window.vnDb.ref(WOTD_PATH + '/usedBy').once('value', function(snap) {
+      entry.usedBy = snap.val() || {};
+      window.vnDb.ref(WOTD_PATH).set(entry)
+        .then(function() { showToast('📡 "' + w + '" is now live for everyone!'); })
+        .catch(function(e) { showToast('Error: ' + e.message); });
+    });
+  } else {
+    // Local fallback
+    wotdDraw(entry);
+    showToast('"' + w + '" set as word of the day!');
+  }
+}
+
+function clearWord() {
+  if (!confirm('Clear the word of the day?')) return;
+  if (window.vnDb) {
+    window.vnDb.ref(WOTD_PATH).remove()
+      .then(function() { showToast('Word of the day cleared'); });
+  } else {
+    wotdDraw(null);
+    showToast('Word cleared');
+  }
+}
+
+function addUsed() {
+  const n = document.getElementById('used-input').value.trim();
+  if (!n) return;
+  document.getElementById('used-input').value = '';
+
+  const id = Date.now().toString(36);
+  const entry = { id: id, name: n, addedAt: Date.now() };
+
+  if (window.vnDb) {
+    window.vnDb.ref(WOTD_PATH + '/usedBy/' + id).set(entry)
+      .catch(function(e) { showToast('Error: ' + e.message); });
+  } else {
+    // Local fallback via re-render
+    showToast(n + ' marked as used');
+  }
+}
+
+function removeUsed(id) {
+  if (window.vnDb) {
+    window.vnDb.ref(WOTD_PATH + '/usedBy/' + id).remove();
+  }
+}
+
+function renderUsed() {} // kept for backward compat, wotdDraw handles it now
+
+// Start Firebase listener for Word of the Day
+function bootWotd() {
+  if (!window.vnDb) return;
+  window.vnDb.ref(WOTD_PATH).on('value', function(snap) {
+    wotdDraw(snap.val());
+  }, function(err) {
+    console.error('[VN] WOTD listener error:', err.message);
+  });
+}
+
+// Call after Firebase is ready
+if (window.vnDbReady) {
+  bootWotd();
+} else {
+  // If Firebase wasn't ready yet, wait for it
+  window.addEventListener('load', function() {
+    if (window.vnDb) bootWotd();
+  });
+}
+
+// ─── AGENDA ──────────────────────────────────────────────────────────────────
+let agenda = [
+  { name: 'Call to order & welcome', dur: '2 min', state: 'none' },
+  { name: 'Officer reports', dur: '5 min', state: 'none' },
+  { name: 'Word of the Day', dur: '2 min', state: 'none' },
+  { name: 'Prepared speeches', dur: '20 min', state: 'none' },
+  { name: 'Table Topics', dur: '15 min', state: 'none' },
+  { name: 'Speech evaluations', dur: '10 min', state: 'none' },
+  { name: 'General evaluation', dur: '5 min', state: 'none' },
+  { name: 'Timer & Ah Counter reports', dur: '3 min', state: 'none' },
+  { name: 'Grammarian report', dur: '2 min', state: 'none' },
+  { name: 'Awards & announcements', dur: '5 min', state: 'none' },
+  { name: 'Adjourn', dur: '1 min', state: 'none' }
+];
+
+function renderAgenda() {
+  const list = document.getElementById('agenda-list');
+  const icons = { none: '', current: '▶', done: '✓' };
+  list.innerHTML = agenda.map((item, i) => `
+    <div class="agenda-item ${item.state}" onclick="cycleAgenda(${i})">
+      <div class="agenda-dot">${icons[item.state]}</div>
+      <div class="agenda-name">${item.name}</div>
+      <div class="agenda-dur">${item.dur}</div>
+      <div class="agenda-del" onclick="event.stopPropagation();removeAgendaItem(${i})" title="Remove">✕</div>
+    </div>`).join('');
+}
+
+function cycleAgenda(i) {
+  const map = { none: 'current', current: 'done', done: 'none' };
+  agenda[i].state = map[agenda[i].state];
+  renderAgenda();
+}
+
+function removeAgendaItem(i) {
+  agenda.splice(i, 1);
+  renderAgenda();
+}
+
+function addAgendaItem() {
+  const name = document.getElementById('agenda-new-name').value.trim();
+  const dur = document.getElementById('agenda-new-dur').value.trim();
+  if (!name) { showToast('Enter an item name'); return; }
+  agenda.push({ name, dur: dur || '', state: 'none' });
+  document.getElementById('agenda-new-name').value = '';
+  document.getElementById('agenda-new-dur').value = '';
+  renderAgenda();
+}
+
+renderAgenda();
+
+// ─── ROLES (Firebase live sign-up) ───────────────────────────────────────────
+const ROLES = [
+  { key: 'tote',       label: 'Toastmaster of the Evening', icon: '🎙️' },
+  { key: 'gen_eval',   label: 'General Evaluator',          icon: '⭐' },
+  { key: 'timer',      label: 'Timer',                      icon: '⏱️' },
+  { key: 'ah_counter', label: 'Ah Counter',                 icon: '🔢' },
+  { key: 'grammarian', label: 'Grammarian',                 icon: '📖' },
+  { key: 'tt_master',  label: 'Table Topics Master',        icon: '💬' },
+  { key: 'saa',        label: 'Sergeant-at-Arms',           icon: '🏛️' },
+  { key: 'eval_1',     label: 'Speech Evaluator 1',         icon: '🗣️' },
+  { key: 'eval_2',     label: 'Speech Evaluator 2',         icon: '🗣️' },
+  { key: 'joke_master',label: 'Inspirational / Joke Master',icon: '✨' },
+];
+
+let roleAssignments = {}; // { roleKey: { name, claimedAt } }
+let rolesDbRef = null;
+
+function getRolesKey() {
+  if (activeSessionIdx !== null && sessions[activeSessionIdx])
+    return 'roles_' + sessions[activeSessionIdx].key;
+  return 'roles_general';
+}
+
+function updateRolesSessionBanner() {
+  const el = document.getElementById('roles-session-label');
+  if (!el) return;
+  if (activeSessionIdx !== null && sessions[activeSessionIdx]) {
+    const s = sessions[activeSessionIdx];
+    const d = s.date;
+    el.textContent = 'Meeting #' + s.num + ' — '
+      + DAYS[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' '
+      + d.getDate() + ', ' + d.getFullYear()
+      + (s.theme ? ' — ' + s.theme : '');
+  } else {
+    const next = sessions.find(s => {
+      const dd = new Date(s.date); dd.setHours(0,0,0,0);
+      return dd >= new Date().setHours(0,0,0,0) && s.status === 'upcoming';
+    });
+    el.textContent = next
+      ? 'Next meeting: ' + DAYS[next.date.getDay()] + ', '
+        + MONTHS[next.date.getMonth()] + ' ' + next.date.getDate()
+        + ', ' + next.date.getFullYear()
+      : 'No upcoming session — check Sessions tab';
+  }
+}
+
+function attachRolesListener() {
+  if (!window.fbDb) return;
+  if (rolesDbRef) rolesDbRef.off();
+  rolesDbRef = window.fbDb.ref('vn_roles');
+  rolesDbRef.on('value', function(snap) {
+    roleAssignments = snap.val() || {};
+    renderRoles();
+  });
+}
+
+function initRolesLocal() {
+  try { roleAssignments = JSON.parse(localStorage.getItem(getRolesKey()) || '{}'); }
+  catch(e) { roleAssignments = {}; }
+  renderRoles();
+}
+
+function saveRolesLocal() {
+  try { localStorage.setItem(getRolesKey(), JSON.stringify(roleAssignments)); } catch(e) {}
+}
+
+// ── Sign-up modal ────────────────────────────────────────────────
+function openRoleModal(roleKey) {
+  const role = ROLES.find(r => r.key === roleKey);
+  if (!role) return;
+  if (roleAssignments[roleKey]) {
+    showToast(role.label + ' is already taken by ' + roleAssignments[roleKey].name);
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'role-modal-overlay';
+  overlay.id = 'role-modal-overlay';
+  overlay.innerHTML = `
+    <div class="role-modal">
+      <div style="font-size:32px;margin-bottom:10px;">${role.icon}</div>
+      <div class="role-modal-title">${role.label}</div>
+      <div class="role-modal-sub">Enter your name to claim this role for the next meeting.</div>
+      <input class="role-modal-input" id="role-modal-name" placeholder="Your full name" autofocus
+        onkeydown="if(event.key==='Enter')confirmRoleClaim('${roleKey}')" />
+      <div class="role-modal-btns">
+        <button class="role-modal-confirm" onclick="confirmRoleClaim('${roleKey}')">✓ Claim this role</button>
+        <button class="role-modal-cancel" onclick="closeRoleModal()">Cancel</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeRoleModal(); });
+  setTimeout(() => document.getElementById('role-modal-name')?.focus(), 50);
+}
+
+function closeRoleModal() {
+  const el = document.getElementById('role-modal-overlay');
+  if (el) el.remove();
+}
+
+function confirmRoleClaim(roleKey) {
+  const name = document.getElementById('role-modal-name')?.value.trim();
+  if (!name) {
+    document.getElementById('role-modal-name').style.borderColor = 'var(--red)';
+    return;
+  }
+  const entry = { name, claimedAt: Date.now() };
+  roleAssignments[roleKey] = entry;
+  // Write to Firebase (primary)
+  if (window.fbDb) {
+    window.fbDb.ref('vn_roles/' + roleKey).set(entry);
+  } else {
+    saveRolesLocal();
+    renderRoles();
+  }
+  closeRoleModal();
+  showToast('✓ Role claimed — see you there, ' + name.split(' ')[0] + '! 🥷');
+}
+
+function vacateRole(roleKey) {
+  if (!confirm('Remove your name from this role?')) return;
+  delete roleAssignments[roleKey];
+  if (window.fbDb) {
+    window.fbDb.ref('vn_roles/' + roleKey).remove();
+  } else {
+    saveRolesLocal(); renderRoles();
+  }
+}
+
+function clearRoles() {
+  const pass = document.getElementById('roles-admin-pass').value;
+  if (pass !== ADMIN_PASSWORD) {
+    document.getElementById('roles-admin-pass').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('roles-admin-pass').style.borderColor = '', 1500);
+    showToast('Incorrect admin password');
+    return;
+  }
+  if (!confirm('Clear ALL role assignments for this session?')) return;
+  if (window.fbDb) {
+    window.fbDb.ref('vn_roles').remove();
+  } else {
+    roleAssignments = {}; saveRolesLocal(); renderRoles();
+  }
+  document.getElementById('roles-admin-pass').value = '';
+  showToast('All roles cleared');
+}
+
+function renderRoles() {
+  // Update session banner safely
+  try { updateRolesSessionBanner(); } catch(e) {}
+
+  const grid = document.getElementById('roles-grid');
+  if (!grid) return; // panel not in DOM yet
+
+  const filled = ROLES.filter(r => roleAssignments[r.key]).length;
+  const open   = ROLES.length - filled;
+
+  const filledEl = document.getElementById('roles-filled');
+  const openEl   = document.getElementById('roles-open');
+  const totalEl  = document.getElementById('roles-total');
+  if (filledEl) filledEl.textContent = filled;
+  if (openEl)   openEl.textContent   = open;
+  if (totalEl)  totalEl.textContent  = ROLES.length;
+
+  // Update live badge
+  const badge = document.getElementById('roles-live-badge');
+  if (badge && attMode === 'firebase') {
+    badge.textContent = '● LIVE';
+    badge.style.background = 'var(--green-bg)';
+    badge.style.color = 'var(--green)';
+  }
+
+  grid.innerHTML = ROLES.map(r => {
+    const assigned = roleAssignments[r.key];
+    if (assigned) {
+      return `
+        <div class="role-card filled">
+          <span class="role-card-icon">${r.icon}</span>
+          <div class="role-label">${r.label}</div>
+          <div class="role-assigned-name">${assigned.name}</div>
+          <button class="role-vacate-btn" onclick="vacateRole('${r.key}')">↩ Remove my name</button>
+        </div>`;
+    } else {
+      return `
+        <div class="role-card open" onclick="openRoleModal('${r.key}')">
+          <span class="role-card-icon">${r.icon}</span>
+          <div class="role-label">${r.label}</div>
+          <div class="role-open-label">Tap to sign up</div>
+          <button class="role-claim-btn" onclick="event.stopPropagation();openRoleModal('${r.key}')">+ I'll take this role</button>
+        </div>`;
+    }
+  }).join('');
+}
+
+// Boot roles — reuse Firebase connection from attendance
+// Called after Firebase is ready (or falls back to local)
+function bootRoles() {
+  updateRolesSessionBanner();
+  if (window.fbDb) {
+    attachRolesListener(); // Firebase is the source of truth
+  } else {
+    initRolesLocal();      // fallback: local only
+  }
+}
+
+// Render roles immediately and again after page fully settles
+renderRoles();
+window.addEventListener('load', () => { try { renderRoles(); } catch(e) {} });
+
+// ─── GRAMMARIAN ──────────────────────────────────────────────────────────────
+let gramLog = [];
+
+function addGrammarNote() {
+  const spk = document.getElementById('gram-speaker').value.trim();
+  const note = document.getElementById('gram-note').value.trim();
+  const type = document.getElementById('gram-type').value;
+  if (!note) { showToast('Enter an observation'); return; }
+  gramLog.unshift({ speaker: spk || 'Unknown', note, type });
+  document.getElementById('gram-speaker').value = '';
+  document.getElementById('gram-note').value = '';
+  renderGrammar();
+}
+
+function renderGrammar() {
+  const el = document.getElementById('grammar-log');
+  if (!gramLog.length) { el.innerHTML = '<p style="font-size:13px;color:var(--text-dim);">No entries yet.</p>'; return; }
+  el.innerHTML = gramLog.map((g, i) => `
+    <div class="grammar-entry">
+      <div class="grammar-speaker">${g.speaker}</div>
+      <div class="grammar-note">${g.note}</div>
+      <span class="grammar-type ${g.type}">${g.type === 'good' ? '✦ Good' : '✗ Fix'}</span>
+      <div class="agenda-del" onclick="gramLog.splice(${i},1);renderGrammar()" style="cursor:pointer;padding:2px 6px;">✕</div>
+    </div>`).join('');
+}
+
+function clearGrammar() {
+  gramLog = [];
+  renderGrammar();
+  showToast('Grammar log cleared');
+}
+
+// ─── NOTES ───────────────────────────────────────────────────────────────────
+function copyNotes() {
+  const text = document.getElementById('meeting-notes').value;
+  if (!text.trim()) { showToast('Notes are empty'); return; }
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
+}
+
+function printNotes() {
+  const content = document.getElementById('meeting-notes').value;
+  const win = window.open('', '_blank');
+  win.document.write(`<html><head><title>Meeting Notes</title><style>
+    body{font-family:Georgia,serif;max-width:700px;margin:40px auto;line-height:1.8;color:#222;}
+    h1{font-size:22px;border-bottom:1px solid #ccc;padding-bottom:10px;}
+    pre{white-space:pre-wrap;font-family:inherit;font-size:14px;}
+  </style></head><body>
+  <h1>Toastmasters Meeting Notes</h1>
+  <p style="color:#888;font-size:13px;">${new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>
+  <pre>${content}</pre></body></html>`);
+  win.document.close();
+  win.print();
+}
+
+
+// ─── ATTENDANCE ───────────────────────────────────────────────────────────────
+// ┌─────────────────────────────────────────────────────────────────────────┐
+// │  ADMIN: Paste your Firebase values here before uploading to GitHub.     │
+// │  Members will NEVER see this — they just get the check-in screen.       │
+// │  Leave blank to use local-only mode (single device).                    │
+// └─────────────────────────────────────────────────────────────────────────┘
+const FB_CONFIG = {
+  apiKey:      'AIzaSyBDjIpzIJ_z1Hk2GaMjdSdiZlTxvV0Gydg',
+  databaseURL: 'https://toolbox-c06b9-default-rtdb.firebaseio.com',
+  projectId:   'toolbox-c06b9',
+};
+// Admin password to unlock roster management on the live site
+const ADMIN_PASSWORD = 'ninjas2026';  // ← change this before uploading
+
+let members  = [];
+let fbDb     = null;
+let fbRef    = null;
+let attMode  = 'local'; // 'firebase' | 'local'
+
+// ── Helpers ──────────────────────────────────────────────────────
+function getAttKey() {
+  if (activeSessionIdx !== null && sessions[activeSessionIdx])
+    return 'sess_' + sessions[activeSessionIdx].key;
+  return 'sess_general';
+}
+
+function setStatusBar(text, color) {
+  const bar  = document.getElementById('att-status-bar');
+  const dot  = document.getElementById('att-status-dot');
+  const txt  = document.getElementById('att-status-text');
+  bar.style.display = 'flex';
+  dot.style.background = color === 'green' ? 'var(--green)'
+                       : color === 'gold'  ? 'var(--gold)'
+                       : 'var(--text-dim)';
+  txt.textContent = text;
+}
+
+function setBadge(mode) {
+  const b = document.getElementById('live-badge');
+  if (mode === 'firebase') {
+    b.textContent = '● LIVE';
+    b.style.background = 'var(--green-bg)';
+    b.style.color = 'var(--green)';
+  } else {
+    b.textContent = 'LOCAL';
+    b.style.background = 'var(--surface3)';
+    b.style.color = 'var(--text-dim)';
+  }
+}
+
+function updateCheckinBanner() {
+  try {
+    const el = document.getElementById('checkin-meeting-label');
+    if (!el) return;
+    const DAY_N = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const MON_N = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    // Try active session first
+    if (typeof activeSessionIdx !== 'undefined' && activeSessionIdx !== null
+        && typeof sessions !== 'undefined' && sessions[activeSessionIdx]) {
+      const s = sessions[activeSessionIdx];
+      const d = new Date(s.date);
+      el.textContent = 'Meeting #' + s.num + ' — '
+        + DAY_N[d.getDay()] + ', ' + MON_N[d.getMonth()] + ' ' + d.getDate()
+        + ', ' + d.getFullYear() + (s.theme ? ' — ' + s.theme : '');
+      return;
+    }
+
+    // Fall back: find next upcoming session
+    if (typeof sessions !== 'undefined' && sessions.length) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const next = sessions.find(s => {
+        const dd = new Date(s.date); dd.setHours(0,0,0,0);
+        return dd >= today && s.status === 'upcoming';
+      });
+      if (next) {
+        const d = new Date(next.date);
+        el.textContent = 'Next meeting: Meeting #' + next.num + ' — '
+          + DAY_N[d.getDay()] + ', ' + MON_N[d.getMonth()] + ' '
+          + d.getDate() + ', ' + d.getFullYear();
+        return;
+      }
+    }
+    el.textContent = 'No upcoming session found — check the Sessions tab';
+  } catch(e) {
+    const el = document.getElementById('checkin-meeting-label');
+    if (el) el.textContent = 'Next meeting: Meeting #1 — Monday, May 26, 2026';
+  }
+}
+
+// ── Firebase ─────────────────────────────────────────────────────
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+function attachListener() {
+  if (fbRef) fbRef.off();
+  fbRef = fbDb.ref('attendance/' + getAttKey());
+  fbRef.on('value', snap => {
+    members = Object.entries(snap.val() || {}).map(([id, m]) => ({ id, ...m }));
+    renderAttendance();
+  });
+}
+
+// ── Local fallback ───────────────────────────────────────────────
+function loadLocal() {
+  try { members = JSON.parse(localStorage.getItem(getAttKey()) || '[]'); }
+  catch(e) { members = []; }
+  renderAttendance();
+}
+
+function saveLocal() {
+  try { localStorage.setItem(getAttKey(), JSON.stringify(members)); } catch(e) {}
+}
+
+// ── Self check-in (members) ──────────────────────────────────────
+function selfCheckIn() {
+  const name = document.getElementById('checkin-name').value.trim();
+  const role = document.getElementById('checkin-role').value.trim();
+  if (!name) { setCheckinMsg('⚠️ Please enter your name first.', 'red'); return; }
+
+  // Check if already confirmed
+  const existing = members.find(m => m.name.toLowerCase() === name.toLowerCase());
+  if (existing && existing.present) {
+    setCheckinMsg('✓ You\'re already confirmed, ' + name.split(' ')[0] + '! See you there 🥷', 'green');
+    return;
+  }
+
+  // Always update locally first so the user sees instant feedback
+  const newEntry = { id: Date.now().toString(), name, role, present: true, checkedAt: Date.now() };
+  if (existing) {
+    existing.present = true;
+  } else {
+    members.push(newEntry);
+  }
+  saveLocal();
+  renderAttendance();
+  setCheckinMsg('✓ Confirmed! See you there, ' + name.split(' ')[0] + ' 🥷', 'green');
+  document.getElementById('checkin-name').value = '';
+  document.getElementById('checkin-role').value = '';
+
+  // Also sync to Firebase in background if connected
+  if (attMode === 'firebase' && fbDb) {
+    const key = getAttKey();
+    const id  = existing ? existing.id : newEntry.id;
+    fbDb.ref('attendance/' + key + '/' + id)
+      .set({ name, role, present: true, checkedAt: Date.now() })
+      .catch(e => {
+        // Firebase write failed — show a subtle warning but local save already worked
+        setCheckinMsg('✓ Saved locally. (Tip: check Firebase rules to enable live sharing)', 'green');
+      });
+  }
+}
+
+function setCheckinMsg(msg, color) {
+  const el = document.getElementById('checkin-msg');
+  el.textContent = msg;
+  el.style.color = color === 'green' ? 'var(--green)' : 'var(--red)';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.textContent = ''; }, 5000);
+}
+
+// ── Admin unlock ─────────────────────────────────────────────────
+function unlockAdmin() {
+  const input = document.getElementById('admin-pass-input').value;
+  if (input === ADMIN_PASSWORD) {
+    document.getElementById('admin-lock').style.display  = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    document.getElementById('admin-pass-input').value    = '';
+    showToast('Admin access granted');
+  } else {
+    document.getElementById('admin-pass-input').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('admin-pass-input').style.borderColor = '', 1500);
+    showToast('Incorrect password');
+  }
+}
+
+function lockAdmin() {
+  document.getElementById('admin-lock').style.display  = 'flex';
+  document.getElementById('admin-panel').style.display = 'none';
+  showToast('Admin panel locked');
+}
+
+// ── Admin actions ────────────────────────────────────────────────
+function addMember() {
+  const name = document.getElementById('att-name-input').value.trim();
+  const role = document.getElementById('att-role-input').value.trim();
+  if (!name) { showToast('Enter a member name'); return; }
+  if (attMode === 'firebase' && fbDb) {
+    const id = fbDb.ref().push().key;
+    fbDb.ref('attendance/' + getAttKey() + '/' + id).set({ name, role, present: false, checkedAt: null });
+  } else {
+    members.push({ id: Date.now().toString(), name, role, present: false });
+    saveLocal(); renderAttendance();
+  }
+  document.getElementById('att-name-input').value = '';
+  document.getElementById('att-role-input').value = '';
+}
+
+function togglePresence(id) {
+  const m = members.find(x => x.id === id);
+  if (!m) return;
+  if (attMode === 'firebase' && fbDb) {
+    fbDb.ref('attendance/' + getAttKey() + '/' + id + '/present').set(!m.present);
+  } else { m.present = !m.present; saveLocal(); renderAttendance(); }
+}
+
+function removeMember(id) {
+  if (attMode === 'firebase' && fbDb) {
+    fbDb.ref('attendance/' + getAttKey() + '/' + id).remove();
+  } else { members = members.filter(m => m.id !== id); saveLocal(); renderAttendance(); }
+}
+
+function markAllPresent() {
+  if (attMode === 'firebase' && fbDb) {
+    const u = {};
+    members.forEach(m => { u['attendance/' + getAttKey() + '/' + m.id + '/present'] = true; });
+    fbDb.ref().update(u);
+  } else { members.forEach(m => m.present = true); saveLocal(); renderAttendance(); }
+  showToast('All marked present');
+}
+
+function markAllAbsent() {
+  if (attMode === 'firebase' && fbDb) {
+    const u = {};
+    members.forEach(m => { u['attendance/' + getAttKey() + '/' + m.id + '/present'] = false; });
+    fbDb.ref().update(u);
+  } else { members.forEach(m => m.present = false); saveLocal(); renderAttendance(); }
+  showToast('All marked absent');
+}
+
+function clearAttendance() {
+  if (!confirm('Reset all attendance for this session?')) return;
+  if (attMode === 'firebase' && fbDb) {
+    fbDb.ref('attendance/' + getAttKey()).remove();
+  } else { members = []; saveLocal(); renderAttendance(); }
+}
+
+// ── Render ───────────────────────────────────────────────────────
+function renderAttendance() {
+  const present = members.filter(m => m.present);
+  const absent  = members.filter(m => !m.present);
+  const total   = members.length;
+  document.getElementById('att-present').textContent = present.length;
+  document.getElementById('att-absent').textContent  = absent.length;
+  document.getElementById('att-total').textContent   = total;
+  document.getElementById('att-pct').textContent     = total ? Math.round(present.length/total*100)+'%' : '—';
+
+  const cEl = document.getElementById('att-confirmed-list');
+  const pEl = document.getElementById('att-pending-list');
+
+  cEl.innerHTML = present.length
+    ? present.map(m => `
+        <div class="att-row present">
+          <div class="att-check">✓</div>
+          <div class="att-name">${m.name}</div>
+          ${m.role ? `<div class="att-role-tag">${m.role}</div>` : ''}
+          <div class="att-status" style="color:var(--green);">CONFIRMED</div>
+          <div class="att-del" onclick="togglePresence('${m.id}')" title="Undo">↩</div>
+          <div class="att-del" onclick="removeMember('${m.id}')" title="Remove">✕</div>
+        </div>`).join('')
+    : '<p style="font-size:13px;color:var(--text-dim);padding:6px 0;">No one confirmed yet — be the first! 🥷</p>';
+
+  pEl.innerHTML = absent.length
+    ? absent.map(m => `
+        <div class="att-row absent" onclick="togglePresence('${m.id}')">
+          <div class="att-check"></div>
+          <div class="att-name">${m.name}</div>
+          ${m.role ? `<div class="att-role-tag">${m.role}</div>` : ''}
+          <div class="att-status">PENDING</div>
+          <div class="att-del" onclick="event.stopPropagation();removeMember('${m.id}')" title="Remove">✕</div>
+        </div>`).join('')
+    : '<p style="font-size:13px;color:var(--text-dim);padding:6px 0;">Everyone has confirmed — full house! 🎉</p>';
+}
+
+// ── Boot ─────────────────────────────────────────────────────────
+function bootAttendanceSafe() {
+  // 1. Update the session banner
+  try {
+    const el = document.getElementById('checkin-meeting-label');
+    if (el) {
+      const DAY_N = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const MON_N = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const today = new Date(); today.setHours(0,0,0,0);
+      let found = false;
+
+      if (typeof sessions !== 'undefined' && Array.isArray(sessions)) {
+        for (let i = 0; i < sessions.length; i++) {
+          const s = sessions[i];
+          const dd = new Date(s.date); dd.setHours(0,0,0,0);
+          if (dd >= today && s.status === 'upcoming') {
+            const d = new Date(s.date);
+            el.textContent = 'Meeting #' + s.num + ' — '
+              + DAY_N[d.getDay()] + ', ' + MON_N[d.getMonth()]
+              + ' ' + d.getDate() + ', ' + d.getFullYear();
+            found = true;
+            break;
+          }
+        }
+      }
+      if (!found) el.textContent = 'Next meeting: Monday, May 26, 2026';
+    }
+  } catch(e) {
+    const el = document.getElementById('checkin-meeting-label');
+    if (el) el.textContent = 'Next meeting: Monday, May 26, 2026';
+  }
+
+  // 2. Firebase connects in background — inline attendance script handles local load
+  // 3. Connect Firebase in background (non-blocking)
+  const hasConfig = FB_CONFIG.apiKey && FB_CONFIG.databaseURL && FB_CONFIG.projectId;
+  if (hasConfig) {
+    Promise.resolve()
+      .then(() => loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js'))
+      .then(() => loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js'))
+      .then(() => {
+        if (!window.firebase) throw new Error('Firebase SDK not loaded');
+        if (!firebase.apps.length) {
+          firebase.initializeApp({
+            apiKey:      FB_CONFIG.apiKey,
+            authDomain:  FB_CONFIG.projectId + '.firebaseapp.com',
+            databaseURL: FB_CONFIG.databaseURL,
+            projectId:   FB_CONFIG.projectId
+          });
+        }
+        fbDb = firebase.database();
+        window.fbDb = fbDb;
+        attMode = 'firebase';
+        window.attMode = 'firebase';
+        setStatusBar('● Live — syncing with Firebase…', 'gold');
+        // listenFirebase is defined in the inline attendance script
+        // It attaches the SINGLE source-of-truth listener on vn_attendance
+        if (typeof listenFirebase === 'function') {
+          listenFirebase();
+        }
+        if (typeof bootWotd === 'function') bootWotd();
+        bootRoles();
+      })
+      .catch(e => {
+        setStatusBar('Offline mode — data saved on this device', 'dim');
+        bootRoles();
+      });
+  } else {
+    setStatusBar('Local mode — set Firebase config to enable live sharing', 'dim');
+    bootRoles();
+  }
+}
+
+// Run on DOM ready — guaranteed to fire
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootAttendanceSafe);
+} else {
+  bootAttendanceSafe();
+}
+// Also re-run after full page load as a safety net
+window.addEventListener('load', function() {
+  try { if (typeof drawBoard === 'function') drawBoard(); } catch(e) {}
+  try { if (typeof renderRoles === 'function') renderRoles(); } catch(e) {}
+});
+
+// ─── ROLE SHEETS ─────────────────────────────────────────────────────────────
+let roleSheets = [
+  { title:'Toastmaster of the Evening', cat:'officer', icon:'🎙️', body:`<p>The TOTE is the master of ceremonies for the entire meeting. Your job is to create a warm, engaging atmosphere from opening to close.</p><ul><li>Prepare a theme and opening remarks in advance</li><li>Introduce each speaker with enthusiasm and relevant context</li><li>Manage time and keep the meeting flowing smoothly</li><li>Thank each participant by name after they speak</li><li>Wrap up with energy — summarize highlights and inspire the group</li></ul>` },
+  { title:'General Evaluator', cat:'evaluator', icon:'⭐', body:`<p>You evaluate the overall meeting — not individual speeches. You are the evaluator of evaluators.</p><ul><li>Observe the TOTE's transitions and energy throughout</li><li>Note the effectiveness of all evaluators' feedback</li><li>Comment on meeting logistics: timing, atmosphere, room setup</li><li>Deliver a balanced report: what worked, what could improve</li><li>Highlight outstanding contributions from functional roles</li></ul>` },
+  { title:'Timer', cat:'functional', icon:'⏱️', body:`<p>The Timer ensures all speakers stay within their allotted time using the traffic light system.</p><ul><li>Explain the light system at the start of the meeting (green / yellow / red)</li><li>Use the green light at minimum time, yellow at midpoint, red at maximum</li><li>Ring the bell when a speaker goes 30 seconds over the red light</li><li>Record each speaker's time accurately</li><li>Give a clear report at the end listing all times</li></ul>` },
+  { title:'Ah Counter', cat:'functional', icon:'🔢', body:`<p>The Ah Counter tracks filler words and sounds that detract from a speaker's message.</p><ul><li>Listen for: um, uh, ah, so, like, you know, basically, right, okay</li><li>Also note excessive use of any single word or phrase</li><li>Keep a tally per speaker — not just a session total</li><li>Deliver your report diplomatically — frame it as growth data, not criticism</li><li>Mention any speaker who delivered a completely filler-free speech</li></ul>` },
+  { title:'Grammarian', cat:'functional', icon:'📖', body:`<p>The Grammarian is the language guardian of the meeting. You celebrate excellent language and note areas for improvement.</p><ul><li>Introduce the Word of the Day at the start and explain it clearly</li><li>Track members who use the word correctly during the meeting</li><li>Note outstanding or creative use of language throughout</li><li>Gently flag grammatical errors or mispronunciations without embarrassing anyone</li><li>End your report with a positive — celebrate the best language moment of the night</li></ul>` },
+  { title:'Table Topics Master', cat:'officer', icon:'💬', body:`<p>You run the impromptu speaking segment — one of the most fun and challenging parts of the meeting.</p><ul><li>Prepare 10–15 thought-provoking questions or scenarios in advance</li><li>Match topic difficulty to the speaker's experience level where possible</li><li>Keep introductions brief — the speaker should do the talking</li><li>Ensure topics are inclusive and non-controversial</li><li>Time yourself: the whole segment should fit within the agenda slot</li></ul>` },
+  { title:'Speech Evaluator', cat:'evaluator', icon:'🗣️', body:`<p>You give a structured 2–3 minute evaluation of one prepared speech.</p><ul><li>Review the speech project objectives beforehand (from the speaker's pathway)</li><li>Take notes during the speech: structure, vocal variety, body language, eye contact</li><li>Use the CRC method: Commend → Recommend → Commend</li><li>Be specific — "your pause before the key point was powerful" beats "good delivery"</li><li>Focus on 1–2 growth areas maximum — don't overwhelm the speaker</li></ul>` },
+  { title:'Sergeant-at-Arms', cat:'officer', icon:'🏛️', body:`<p>The SAA is responsible for the physical meeting environment and member welfare.</p><ul><li>Arrive early to arrange chairs, set up materials, and test any AV equipment</li><li>Greet members at the door and assist guests</li><li>Manage the ballot process for awards (if applicable)</li><li>Handle any disruptions or technical issues discreetly</li><li>Close the meeting room and ensure everything is returned to its proper state</li></ul>` },
+  { title:'Inspirational / Joke Master', cat:'functional', icon:'✨', body:`<p>You open the meeting with a short inspirational quote or a clean, well-timed joke to energize the room.</p><ul><li>Keep it under 90 seconds</li><li>Choose content appropriate for all ages and backgrounds</li><li>Deliver with confidence — own the room from the first word</li><li>Attribute quotes correctly and explain their relevance to the session theme</li><li>A smile from the audience is your best feedback</li></ul>` },
+];
+
+let rsFilter = 'all';
+
+function filterSheets(cat, btn) {
+  rsFilter = cat;
+  document.querySelectorAll('#panel-rolesheets .preset-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  renderRoleSheets();
+}
+
+function toggleSheet(i) {
+  const card = document.getElementById('rs-card-'+i);
+  card.classList.toggle('open');
+}
+
+let pendingPdfData = null; // base64 of PDF being added
+let pendingPdfName = '';
+
+function previewNewPdf(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 8 * 1024 * 1024) { showToast('PDF too large — max 8 MB'); input.value = ''; return; }
+  pendingPdfName = file.name;
+  document.getElementById('rs-pdf-name').textContent = '📎 ' + file.name;
+  const reader = new FileReader();
+  reader.onload = e => { pendingPdfData = e.target.result; };
+  reader.readAsDataURL(file);
+}
+
+function attachPdfToSheet(i, input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 8 * 1024 * 1024) { showToast('PDF too large — max 8 MB'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    roleSheets[i].pdfData = e.target.result;
+    roleSheets[i].pdfName = file.name;
+    saveSheetsToStorage();
+    renderRoleSheets();
+    // Re-open the card
+    setTimeout(() => {
+      const card = document.getElementById('rs-card-' + i);
+      if (card) card.classList.add('open');
+    }, 50);
+    showToast('PDF attached: ' + file.name);
+  };
+  reader.readAsDataURL(file);
+}
+
+function downloadPdf(i) {
+  const sheet = roleSheets[i];
+  if (!sheet.pdfData) return;
+  const a = document.createElement('a');
+  a.href = sheet.pdfData;
+  a.download = sheet.pdfName || sheet.title + '.pdf';
+  a.click();
+}
+
+function removePdf(i) {
+  roleSheets[i].pdfData = null;
+  roleSheets[i].pdfName = '';
+  saveSheetsToStorage();
+  renderRoleSheets();
+  showToast('PDF removed');
+}
+
+function saveSheetsToStorage() {
+  try {
+    // Save only non-PDF metadata to avoid quota issues with large PDFs
+    const meta = roleSheets.map(r => ({
+      title: r.title, cat: r.cat, icon: r.icon, body: r.body,
+      pdfName: r.pdfName || ''
+    }));
+    localStorage.setItem('vn_rolesheets_meta', JSON.stringify(meta));
+    // Save PDFs individually by index
+    roleSheets.forEach((r, i) => {
+      if (r.pdfData) {
+        try { localStorage.setItem('vn_pdf_' + i, r.pdfData); } catch(e) {}
+      } else {
+        localStorage.removeItem('vn_pdf_' + i);
+      }
+    });
+  } catch(e) {}
+}
+
+function loadSheetsFromStorage() {
+  try {
+    const meta = JSON.parse(localStorage.getItem('vn_rolesheets_meta') || 'null');
+    if (meta && meta.length) {
+      roleSheets = meta.map((m, i) => ({
+        ...m,
+        pdfData: localStorage.getItem('vn_pdf_' + i) || null
+      }));
+    }
+  } catch(e) {}
+}
+
+function addRoleSheet() {
+  const title = document.getElementById('rs-title').value.trim();
+  const cat = document.getElementById('rs-cat').value;
+  const body = document.getElementById('rs-body').value.trim();
+  if (!title) { showToast('Enter a role title'); return; }
+  const icons = { officer:'📋', functional:'⚙️', evaluator:'📝' };
+  roleSheets.push({
+    title, cat, icon: icons[cat],
+    body: `<p>${body.replace(/\n/g,'<br>')}</p>`,
+    pdfData: pendingPdfData || null,
+    pdfName: pendingPdfName || ''
+  });
+  document.getElementById('rs-title').value = '';
+  document.getElementById('rs-body').value = '';
+  document.getElementById('rs-pdf-input').value = '';
+  document.getElementById('rs-pdf-name').textContent = '';
+  pendingPdfData = null; pendingPdfName = '';
+  saveSheetsToStorage();
+  renderRoleSheets();
+  showToast('"' + title + '" added to repository');
+}
+
+function deleteSheet(i) {
+  localStorage.removeItem('vn_pdf_' + i);
+  roleSheets.splice(i, 1);
+  saveSheetsToStorage();
+  renderRoleSheets();
+  showToast('Role sheet removed');
+}
+
+function renderRoleSheets() {
+  const grid = document.getElementById('rolesheets-grid');
+  const filtered = rsFilter === 'all' ? roleSheets : roleSheets.filter(r => r.cat === rsFilter);
+  if (!filtered.length) {
+    grid.innerHTML = '<p style="font-size:13px;color:var(--text-dim);">No role sheets in this category.</p>';
+    return;
+  }
+  grid.innerHTML = filtered.map(r => {
+    const i = roleSheets.indexOf(r);
+    const hasPdf = !!r.pdfData;
+    const pdfSection = hasPdf ? `
+      <div class="pdf-row">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#378ADD;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="pdf-filename">${r.pdfName || 'role-script.pdf'}</span>
+        <button class="pdf-download-btn" onclick="downloadPdf(${i})">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF
+        </button>
+        <button class="pdf-remove-btn" onclick="event.stopPropagation();removePdf(${i})">✕ Remove</button>
+      </div>` : `
+      <div class="pdf-row">
+        <label class="pdf-upload-label" for="pdf-file-${i}" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
+          Attach PDF script
+        </label>
+        <input type="file" id="pdf-file-${i}" accept="application/pdf" style="display:none;" onchange="attachPdfToSheet(${i}, this)" />
+      </div>`;
+    return `
+    <div class="rs-card" id="rs-card-${i}">
+      <div class="rs-header" onclick="toggleSheet(${i})">
+        <div class="rs-icon ${r.cat}">${r.icon}</div>
+        <div class="rs-title-block">
+          <div class="rs-name">${r.title} ${hasPdf ? '<span style="font-size:10px;color:#378ADD;margin-left:4px;">📎 PDF</span>' : ''}</div>
+          <span class="rs-cat-badge ${r.cat}">${r.cat}</span>
+        </div>
+        <div class="rs-del" onclick="event.stopPropagation();deleteSheet(${i})" title="Remove sheet">✕</div>
+        <div class="rs-chevron">⌄</div>
+      </div>
+      <div class="rs-body">
+        ${r.body}
+        ${pdfSection}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Load any previously saved sheets on startup
+loadSheetsFromStorage();
+renderRoleSheets();
+
+// ─── KEYBOARD SHORTCUTS ──────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space') { e.preventDefault(); toggleTimer(); }
+  if (e.code === 'KeyR') resetTimer();
+  if (e.code === 'KeyB') ringBell();
+});
+</script>
+</body>
+</html>
