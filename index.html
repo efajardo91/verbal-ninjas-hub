@@ -35,6 +35,204 @@
     --shadow-gold: 0 0 32px rgba(201,168,76,0.14);
   }
 
+  /* ══════════════════════════════════════════════════════
+     PROFESSIONAL THEME OVERRIDES
+  ══════════════════════════════════════════════════════ */
+
+  /* ── Typography ── */
+  h1 {
+    font-size: clamp(30px, 4.5vw, 48px) !important;
+    letter-spacing: -1px !important;
+    line-height: 1.05 !important;
+    font-weight: 700 !important;
+    background: linear-gradient(135deg, #f5ede0 0%, #C9A84C 50%, #f5ede0 100%);
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+  h1 span {
+    -webkit-text-fill-color: transparent !important;
+  }
+
+  /* ── Header badge — pill chip ── */
+  .header-badge {
+    background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05)) !important;
+    border: 1px solid rgba(201,168,76,0.35) !important;
+    backdrop-filter: blur(8px) !important;
+    font-size: 10px !important;
+    letter-spacing: 0.18em !important;
+    padding: 6px 18px !important;
+  }
+
+  /* ── Header divider — wider, more prominent ── */
+  .divider {
+    width: 120px !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.6) 30%, rgba(201,168,76,0.9) 50%, rgba(201,168,76,0.6) 70%, transparent) !important;
+  }
+
+  /* ── Nav bar ── */
+  .nav {
+    background: linear-gradient(180deg, rgba(28,28,42,0.95) 0%, rgba(16,16,24,0.98) 100%) !important;
+    border: 1px solid rgba(201,168,76,0.15) !important;
+    border-radius: 999px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06) inset !important;
+    backdrop-filter: blur(16px) !important;
+    padding: 6px !important;
+  }
+  .nav-btn {
+    border-radius: 999px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    transition: all 0.2s ease !important;
+    gap: 5px !important;
+  }
+  .nav-btn svg { width: 14px !important; height: 14px !important; }
+  .nav-btn:hover {
+    background: rgba(201,168,76,0.08) !important;
+    color: var(--text) !important;
+  }
+  .nav-btn.active {
+    background: linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.08) 100%) !important;
+    color: var(--gold) !important;
+    border: 0.5px solid rgba(201,168,76,0.4) !important;
+    box-shadow: 0 2px 12px rgba(201,168,76,0.15), 0 1px 0 rgba(255,255,255,0.06) inset !important;
+  }
+
+  /* ── Cards — clean glass-morphism ── */
+  .card {
+    background: linear-gradient(145deg, rgba(22,22,34,0.95) 0%, rgba(14,14,22,0.98) 100%) !important;
+    border: 1px solid rgba(255,255,255,0.07) !important;
+    border-radius: 18px !important;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.06) inset,
+      0 -1px 0 rgba(0,0,0,0.3) inset,
+      0 20px 60px rgba(0,0,0,0.5),
+      0 4px 16px rgba(0,0,0,0.4) !important;
+    backdrop-filter: blur(12px) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+  .card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.07) inset,
+      0 -1px 0 rgba(0,0,0,0.3) inset,
+      0 28px 70px rgba(0,0,0,0.55),
+      0 6px 20px rgba(0,0,0,0.45) !important;
+  }
+  .card-gold {
+    border: 1px solid rgba(201,168,76,0.2) !important;
+    background: linear-gradient(145deg, rgba(24,22,38,0.95) 0%, rgba(14,14,22,0.98) 100%) !important;
+    box-shadow:
+      0 1px 0 rgba(201,168,76,0.1) inset,
+      0 -1px 0 rgba(0,0,0,0.3) inset,
+      0 20px 60px rgba(0,0,0,0.5),
+      0 0 40px rgba(201,168,76,0.04) !important;
+  }
+  .card-gold::before {
+    height: 2px !important;
+    background: linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.4) 20%, rgba(201,168,76,0.95) 50%, rgba(201,168,76,0.4) 80%, transparent 100%) !important;
+  }
+
+  /* ── Card title ── */
+  .card-title {
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.2px !important;
+    color: #f0ece4 !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    margin-bottom: 18px !important;
+  }
+
+  /* ── Section labels ── */
+  .section-label {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    color: rgba(201,168,76,0.7) !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* ── Buttons ── */
+  .add-btn {
+    background: linear-gradient(135deg, #C9A84C 0%, #a07828 100%) !important;
+    color: #0a0a10 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    letter-spacing: 0.02em !important;
+    border-radius: 10px !important;
+    border: none !important;
+    box-shadow: 0 2px 12px rgba(201,168,76,0.3), 0 1px 0 rgba(255,255,255,0.2) inset !important;
+    transition: all 0.2s ease !important;
+  }
+  .add-btn:hover {
+    background: linear-gradient(135deg, #e0ba58 0%, #b88830 100%) !important;
+    box-shadow: 0 4px 20px rgba(201,168,76,0.45), 0 1px 0 rgba(255,255,255,0.2) inset !important;
+    transform: translateY(-1px) !important;
+  }
+  .ctrl-btn {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    color: var(--text-muted) !important;
+    border-radius: 10px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+  }
+  .ctrl-btn:hover {
+    background: rgba(255,255,255,0.1) !important;
+    color: var(--text) !important;
+    border-color: rgba(255,255,255,0.16) !important;
+  }
+  .ctrl-btn.danger {
+    border-color: rgba(201,64,64,0.25) !important;
+    color: rgba(201,64,64,0.8) !important;
+  }
+  .ctrl-btn.danger:hover {
+    background: rgba(201,64,64,0.1) !important;
+    border-color: rgba(201,64,64,0.5) !important;
+    color: var(--red) !important;
+  }
+
+  /* ── Input fields ── */
+  .field {
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    color: var(--text) !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+  }
+  .field:focus {
+    border-color: rgba(201,168,76,0.5) !important;
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.08) !important;
+    outline: none !important;
+    background: rgba(255,255,255,0.06) !important;
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 32px 20px 40px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.25);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    letter-spacing: 0.05em;
+    position: relative;
+    z-index: 1;
+  }
+  footer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3) 50%, transparent);
+  }
+  footer a { color: rgba(201,168,76,0.6); text-decoration: none; }
+  footer a:hover { color: var(--gold); }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
@@ -213,7 +411,17 @@
 
   /* PANELS */
   .panel { display: none; animation: fadeUp 0.3s ease; }
-  .panel.active { display: block; }
+  .panel {
+    animation: none;
+  }
+  .panel.active {
+    display: block;
+    animation: panelIn 0.22s ease forwards;
+  }
+  @keyframes panelIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
   /* CARDS */
@@ -866,24 +1074,61 @@
   ::-webkit-scrollbar-thumb:hover { background: var(--border); }
 
   /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--surface);
-    border: 0.5px solid var(--border);
+  /* New toast system */
+  .vn-toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px 12px 14px;
+    background: linear-gradient(135deg, rgba(26,26,40,0.98), rgba(16,16,28,0.98));
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
     color: var(--text);
     font-size: 13px;
     font-weight: 500;
-    padding: 10px 20px;
-    border-radius: 30px;
-    box-shadow: var(--shadow);
-    transition: transform 0.3s ease;
-    z-index: 999;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.06) inset;
+    backdrop-filter: blur(16px);
     white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(.34,1.56,.64,1);
+    max-width: 340px;
+    overflow: hidden;
+    position: relative;
   }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  .vn-toast.vn-show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  .vn-toast.vn-hide {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .vn-toast-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+  .vn-toast-icon.success { background: rgba(62,173,120,0.2); color: var(--green); border: 1px solid rgba(62,173,120,0.3); }
+  .vn-toast-icon.error   { background: rgba(201,64,64,0.2);  color: var(--red);   border: 1px solid rgba(201,64,64,0.3); }
+  .vn-toast-icon.info    { background: rgba(201,168,76,0.2); color: var(--gold);  border: 1px solid rgba(201,168,76,0.3); }
+  .vn-toast-bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 0 0 14px 14px;
+    animation: toastProgress 2.5s linear forwards;
+  }
+  @keyframes toastProgress { from { width: 100%; } to { width: 0%; } }
 
   /* PROGRESS BAR */
   .progress-bar-wrap {
@@ -1193,6 +1438,21 @@
     </div>
     <p class="header-sub">Sessions · Timer · Ah Counter · Word of the Day · Agenda · Roles · Grammarian · Attendance · Votes</p>
 
+    <!-- Meeting countdown -->
+    <div id="countdown-wrap" style="margin-top:14px;display:inline-flex;align-items:center;gap:16px;padding:10px 22px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.18);border-radius:999px;backdrop-filter:blur(8px);">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(201,168,76,0.6);">Next Meeting</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div style="text-align:center;"><div id="cd-days" style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--gold);line-height:1;">—</div><div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-top:1px;">days</div></div>
+        <div style="color:rgba(201,168,76,0.3);font-size:18px;">:</div>
+        <div style="text-align:center;"><div id="cd-hours" style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--gold);line-height:1;">—</div><div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-top:1px;">hrs</div></div>
+        <div style="color:rgba(201,168,76,0.3);font-size:18px;">:</div>
+        <div style="text-align:center;"><div id="cd-mins" style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--gold);line-height:1;">—</div><div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-top:1px;">min</div></div>
+        <div style="color:rgba(201,168,76,0.3);font-size:18px;">:</div>
+        <div style="text-align:center;"><div id="cd-secs" style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--gold);line-height:1;">—</div><div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-top:1px;">sec</div></div>
+      </div>
+      <div id="cd-status" style="font-size:11px;color:var(--text-dim);"></div>
+    </div>
+
     <!-- Next Meeting Theme (live, admin-protected) -->
     <div style="margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:8px;">
       <div style="display:flex;align-items:center;gap:7px;">
@@ -1279,6 +1539,7 @@
         <div id="sess-admin-unlocked" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto;">
           <span style="font-size:12px;color:var(--green);font-weight:600;">✓ Sessions unlocked</span>
           <button class="ctrl-btn" onclick="toggleChangePassword()" style="font-size:12px;padding:6px 12px;">🔑 Change Password</button>
+          <button class="ctrl-btn" onclick="openQr()" style="font-size:12px;padding:6px 12px;">📱 QR Code</button>
           <button class="ctrl-btn" onclick="lockSessAdmin()" style="font-size:12px;padding:6px 12px;">🔒 Lock</button>
         </div>
         <!-- Change password panel (hidden by default) -->
@@ -2033,7 +2294,7 @@ function unlockSessAdmin() {
   } else {
     document.getElementById('sess-admin-pass').style.borderColor = 'var(--red)';
     setTimeout(function(){ document.getElementById('sess-admin-pass').style.borderColor = ''; }, 1500);
-    showToast('Incorrect password');
+    showToast('Incorrect password', 'error');
   }
 }
 
@@ -2170,14 +2431,122 @@ if (document.readyState === 'loading') {
 }
 
 // ─── TOAST ───────────────────────────────────────────────────────────────────
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+// ─── TOAST NOTIFICATIONS ─────────────────────────────────────────────────────
+function showToast(msg, type) {
+  // type: 'success' | 'error' | 'info' (default info)
+  var t = type || 'info';
+  var icon = t === 'success' ? '✓' : t === 'error' ? '✗' : '●';
+  var container = document.getElementById('toast-container');
+  if (!container) return;
+
+  var toast = document.createElement('div');
+  toast.className = 'vn-toast';
+  toast.innerHTML =
+    '<div class="vn-toast-icon ' + t + '">' + icon + '</div>' +
+    '<span>' + msg + '</span>' +
+    '<div class="vn-toast-bar"></div>';
+  container.appendChild(toast);
+
+  // Animate in
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { toast.classList.add('vn-show'); });
+  });
+
+  // Animate out + remove
+  setTimeout(function() {
+    toast.classList.add('vn-hide');
+    setTimeout(function() {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 300);
+  }, 2500);
 }
+
+// ─── MEETING COUNTDOWN ────────────────────────────────────────────────────────
+function getNextMeetingDate() {
+  var start = new Date('2026-05-27T12:00:00'); // First Tuesday
+  var bi    = 14 * 24 * 60 * 60 * 1000;
+  var now   = new Date();
+  var d     = new Date(start);
+  while (d <= now) d = new Date(d.getTime() + bi);
+  return d;
+}
+
+function updateCountdown() {
+  var next  = getNextMeetingDate();
+  var now   = new Date();
+  var diff  = next - now;
+  if (diff <= 0) { updateCountdown(); return; }
+  var days  = Math.floor(diff / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var mins  = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  var secs  = Math.floor((diff % (1000 * 60)) / 1000);
+  var pad   = function(n) { return n < 10 ? '0'+n : n; };
+  var dEl = document.getElementById('cd-days'),
+      hEl = document.getElementById('cd-hours'),
+      mEl = document.getElementById('cd-mins'),
+      sEl = document.getElementById('cd-secs'),
+      st  = document.getElementById('cd-status');
+  if (dEl) dEl.textContent = days;
+  if (hEl) hEl.textContent = pad(hours);
+  if (mEl) mEl.textContent = pad(mins);
+  if (sEl) sEl.textContent = pad(secs);
+  // Pulse green when < 1 hour away
+  var wrap = document.getElementById('countdown-wrap');
+  if (wrap) {
+    if (diff < 3600000) {
+      wrap.style.borderColor = 'rgba(62,173,120,0.5)';
+      wrap.style.background  = 'rgba(62,173,120,0.06)';
+      if (st) st.textContent = '🟢 Starting soon!';
+    } else if (diff < 86400000) {
+      if (st) st.textContent = 'Today';
+    } else {
+      if (st) st.textContent = '';
+    }
+  }
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
+// ─── QR CODE ─────────────────────────────────────────────────────────────────
+function openQr() {
+  var url = window.location.href;
+  var modal = document.getElementById('qr-modal');
+  var wrap  = document.getElementById('qr-canvas-wrap');
+  var label = document.getElementById('qr-url-label');
+  if (!modal) return;
+  if (label) label.textContent = url;
+  wrap.innerHTML = '';
+
+  // Generate QR using Google Charts API (no library needed)
+  var img = document.createElement('img');
+  img.src = 'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=' + encodeURIComponent(url) + '&chld=M|2';
+  img.alt = 'QR Code';
+  img.style.cssText = 'width:200px;height:200px;border-radius:6px;display:block;';
+  wrap.appendChild(img);
+
+  modal.style.display = 'flex';
+  setTimeout(function() { modal.style.opacity = '1'; }, 10);
+}
+
+function closeQr() {
+  var modal = document.getElementById('qr-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function copyQrUrl() {
+  var url = window.location.href;
+  navigator.clipboard.writeText(url).then(function() {
+    showToast('Link copied to clipboard ✓', 'success');
+  }).catch(function() {
+    showToast('Copy: ' + url, 'info');
+  });
+}
+
+// Close QR on backdrop click
+var _qrModal = document.getElementById('qr-modal');
+if (_qrModal) _qrModal.addEventListener('click', function(e) {
+  if (e.target === this) closeQr();
+});
 
 // ─── TIMER ───────────────────────────────────────────────────────────────────
 let timerSec = 0, running = false, interval = null;
@@ -2430,7 +2799,7 @@ function unlockThemeAdmin() {
   } else {
     document.getElementById('theme-admin-pass').style.borderColor = 'var(--red)';
     setTimeout(function(){ document.getElementById('theme-admin-pass').style.borderColor = ''; }, 1500);
-    showToast('Incorrect password');
+    showToast('Incorrect password', 'error');
   }
 }
 
@@ -2724,7 +3093,7 @@ function unlockAgendaAdmin() {
   } else {
     document.getElementById('agenda-admin-pass').style.borderColor = 'var(--red)';
     setTimeout(function(){ document.getElementById('agenda-admin-pass').style.borderColor = ''; }, 1500);
-    showToast('Incorrect password');
+    showToast('Incorrect password', 'error');
   }
 }
 
@@ -3295,7 +3664,7 @@ function unlockAdmin() {
   } else {
     document.getElementById('admin-pass-input').style.borderColor = 'var(--red)';
     setTimeout(() => document.getElementById('admin-pass-input').style.borderColor = '', 1500);
-    showToast('Incorrect password');
+    showToast('Incorrect password', 'error');
   }
 }
 
@@ -3492,7 +3861,7 @@ function vCastVote(section, id) {
     var newVotes = (entry.votes||0) + 1;
     var updated  = { id: entry.id, name: entry.name, votes: newVotes };
     window.vnDb.ref('vn_votes/'+section+'/'+id).set(updated)
-      .then(function(){ showToast('Vote cast ✓'); })
+      .then(function(){ showToast('Vote cast ✓', 'success'); })
       .catch(function(err){ console.error('[Votes] write error:',err); showToast('Sync failed — check connection'); });
   } else {
     showToast('Vote cast (offline)');
@@ -3505,7 +3874,7 @@ function unlockVotesAdmin(){
   if ((document.getElementById('votes-admin-pass').value||'')!==ADMIN_PASSWORD){
     document.getElementById('votes-admin-pass').style.borderColor='var(--red)';
     setTimeout(function(){ document.getElementById('votes-admin-pass').style.borderColor=''; },1500);
-    showToast('Incorrect password'); return;
+    showToast('Incorrect password', 'error'); return;
   }
   votesAdminUnlocked=true;
   document.getElementById('votes-admin-lock').style.display    ='none';
@@ -3513,7 +3882,7 @@ function unlockVotesAdmin(){
   document.getElementById('speech-admin-row').style.display    ='block';
   document.getElementById('tt-admin-row').style.display        ='block';
   document.getElementById('votes-admin-pass').value='';
-  showToast('Admin access granted ✓');
+  showToast('Admin access granted ✓', 'success');
 }
 window.unlockVotesAdmin = unlockVotesAdmin;
 
@@ -3597,7 +3966,7 @@ function unlockWotdAdmin() {
   } else {
     document.getElementById('wotd-admin-pass').style.borderColor = 'var(--red)';
     setTimeout(function(){ document.getElementById('wotd-admin-pass').style.borderColor=''; }, 1500);
-    showToast('Incorrect password');
+    showToast('Incorrect password', 'error');
   }
 }
 function lockWotdAdmin() {
@@ -3621,7 +3990,7 @@ function unlockGramAdmin() {
   } else {
     document.getElementById('gram-admin-pass').style.borderColor = 'var(--red)';
     setTimeout(function(){ document.getElementById('gram-admin-pass').style.borderColor=''; }, 1500);
-    showToast('Incorrect password');
+    showToast('Incorrect password', 'error');
   }
 }
 function lockGramAdmin() {
@@ -3872,5 +4241,23 @@ document.addEventListener('keydown', e => {
   console.log('[VN] All listeners active ✓');
 })();
 </script>
+
+<!-- Toast notifications -->
+<div id="toast-container" style="position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;"></div>
+
+<!-- QR Code modal -->
+<div id="qr-modal" style="display:none;position:fixed;inset:0;z-index:9998;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);">
+  <div style="background:linear-gradient(145deg,#1a1a28,#0e0e18);border:1px solid rgba(201,168,76,0.3);border-radius:24px;padding:36px;text-align:center;max-width:320px;width:90%;box-shadow:0 24px 80px rgba(0,0,0,0.7);">
+    <div style="font-family:var(--font-display);font-size:20px;font-weight:600;color:var(--gold);margin-bottom:6px;">Scan to Join</div>
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:20px;">Share with members to access the live session hub</div>
+    <div id="qr-canvas-wrap" style="background:white;border-radius:12px;padding:14px;display:inline-block;margin-bottom:20px;"></div>
+    <div style="font-size:11px;color:var(--text-dim);word-break:break-all;margin-bottom:20px;padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:8px;" id="qr-url-label"></div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="add-btn" onclick="copyQrUrl()" style="font-size:13px;padding:10px 20px;">📋 Copy Link</button>
+      <button class="ctrl-btn" onclick="closeQr()" style="font-size:13px;padding:10px 20px;">Close</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
